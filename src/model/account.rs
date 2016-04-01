@@ -1,7 +1,9 @@
+use custom_ser::*;
+use serde;
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Account {
     pub id: String,
     pub business_name: Option<String>,
@@ -30,20 +32,20 @@ pub struct Account {
     pub verification: Option<Verification>
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeclineChargeOn {
     pub avs_failure: bool,
     pub cvs_failure: bool
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExternalAccount {
     pub id: String,
     pub customer: String,
     pub account: String
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LegalEntity {
     #[serde(rename="type")]
     pub entity_type: String,
@@ -51,16 +53,43 @@ pub struct LegalEntity {
     pub business_name: String,
     pub business_tax_id_provided: bool,
     pub dob: DateOfBirth,
-    pub first_name: String,
-    pub last_name: String,
-    pub personal_address: Address,
-    pub personal_id_number_provided: bool,
-    pub ssn_last_4_provided: bool,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub personal_address: Option<Address>,
+    pub personal_id_number_provided: Option<bool>,
+    pub ssn_last_4_provided: Option<bool>,
     pub verification: Verification,
     pub additional_owners: Vec<Owner>
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+pub enum LegalEntityType {
+    Individual,
+    Company,
+    Unknown(String)
+}
+
+impl LegalEntityType {
+    fn from_str(s: &str) -> LegalEntityType {
+        match s {
+            "individual" => LegalEntityType::Individual,
+            "company"    => LegalEntityType::Company,
+            unknown      => LegalEntityType::Unknown(String::from(unknown))
+        }
+    }
+
+    fn to_string(&self) -> String {
+        String::from(match *self {
+            LegalEntityType::Individual     => "individual",
+            LegalEntityType::Company        => "company",
+            LegalEntityType::Unknown(ref s) => s
+        })
+    }
+}
+
+simple_serde!(LegalEntityType, LegalEntityType::to_string, LegalEntityType::from_str);
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Address {
     pub line1: String,
     pub line2: Option<String>,
@@ -70,14 +99,14 @@ pub struct Address {
     pub state: String
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DateOfBirth {
     day: i64,
     month: i64,
     year: i64
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Verification {
     fields_needed: Vec<String>,
     due_by: i64,
@@ -85,7 +114,7 @@ pub struct Verification {
     disabled_reason: String
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Owner {
     address: Address,
     dob: DateOfBirth,
@@ -94,14 +123,14 @@ pub struct Owner {
     verification: Verification
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TosAcceptance {
     date: i64,
     ip: String,
     user_agent: String
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TransferSchedule {
     delay_days: i64,
     interval: String,

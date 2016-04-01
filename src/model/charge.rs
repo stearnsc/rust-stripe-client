@@ -1,0 +1,28 @@
+#[derive(Debug, Serialize, Deserialize)]
+struct Charge {
+    id: String,
+    amount: i64,
+    amount_refunded: i64,
+    application_fee: Option<String>,
+    balance_transaction: String,
+    captured: bool,
+    created: i64,
+    currency: String,
+    customer: String,
+    description: Option<String>,
+    dispute: Option<Dispute>,
+    failure_code: Option<String>,
+    failure_message: Option<String>,
+    fraud_details: Option<BTreeMap<String, String>>,
+    invoice: Option<String>,
+    livemode: bool,
+    metadata: Option<BTreeMap<String, String>>,
+    order: Option<String>,
+    paid: bool,
+    receipt_email: String,
+    receipt_number: String,
+    refunded: bool,
+    refunds: ApiList<Refund>,
+    shipping: Option<Shipping>,
+
+}

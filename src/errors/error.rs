@@ -58,10 +58,10 @@ impl std::error::Error for Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
-            Error::HyperError(ref err) => write!(f, "Error(HyperError({}))", err),
-            Error::SerdeError(ref err) => write!(f, "Error(SerdeError({}))", err),
-            Error::IoError(ref err) => write!(f, "Error(IoError({}))", err),
-            Error::StripeError(ref err) => write!(f, "Error(StripeError({}))", err)
+            Error::HyperError(ref err)  => write!(f, "Error::HyperError({})", err),
+            Error::SerdeError(ref err)  => write!(f, "Error::SerdeError({})", err),
+            Error::IoError(ref err)     => write!(f, "Error::IoError({})", err),
+            Error::StripeError(ref err) => write!(f, "Error::StripeError({})", err)
         }
     }
 }

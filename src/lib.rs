@@ -3,6 +3,7 @@
 #![plugin(serde_macros)]
 
 extern crate hyper;
+extern crate rand;
 extern crate serde;
 extern crate serde_json;
 
@@ -10,9 +11,13 @@ use hyper::client::response::Response;
 use hyper::Client;
 use hyper::header::{Authorization, Basic, Headers};
 use hyper::status::StatusCode;
+use rand::Rng;
 use serde::de::Deserialize;
 use std::collections::BTreeMap;
 use std::io::Read;
+
+#[macro_use]
+mod custom_ser;
 
 pub mod errors;
 pub mod idempotency_header;
@@ -41,13 +46,24 @@ impl StripeClient {
         }
     }
 
-    pub fn get_account(&self) -> Result<Account> {
+    /// Fetch the account associated with this API key
+    pub fn fetch_account(&self) -> Result<Account> {
         let url = StripeClient::endpoint("/account");
-        let mut res = self.client.get(&url)
+        let res = self.client.get(&url)
             .header(self.authorization_header())
             .send()?;
 
-        StripeClient::parse_response(&mut res)
+        StripeClient::parse_response(res)
+    }
+
+    /// Fetch account by account_id
+    pub fn fetch_account_by_id(&self, account_id: &str) -> Result<Account> {
+        let url = StripeClient::path(format!("/accounts/{}", account_id));
+        let res = self.client.get(&url)
+            .header(self.authorization_header())
+            .send()?;
+
+        StripeClient::parse_response(res)
     }
 
     pub fn create_account(
@@ -56,30 +72,61 @@ impl StripeClient {
         email: Option<String>,
         managed: bool
     ) -> Result<Account> {
-        if !managed && email.is_none() {
-            panic!("Email is required for non-managed accounts");
-        } else {
-            let url = StripeClient::endpoint("/accounts");
+        let url = StripeClient::endpoint("/accounts");
 
-            let mut fields = BTreeMap::new();
-            if let Some(country) = country {
-                fields.insert(String::from("country"), country);
-            }
-            if let Some(email) = email {
-                fields.insert(String::from("email"), email);
-            }
-            fields.insert(String::from("managed"), managed.to_string());
-            let body = StripeClient::form_encode(&fields);
-
-            let mut res = self.client.post(&url)
-                .body(body.as_slice())
-                .send()?;
-
-            StripeClient::parse_response(&mut res)
+        let mut fields = BTreeMap::new();
+        if let Some(country) = country {
+            fields.insert(String::from("country"), country);
         }
+        if let Some(email) = email {
+            fields.insert(String::from("email"), email);
+        }
+        fields.insert(String::from("managed"), managed.to_string());
+
+        let body = StripeClient::encode_body(&fields);
+
+        let res = self.client.post(&url)
+            .header(self.authorization_header())
+            .body(body.as_slice())
+            .send()?;
+
+        StripeClient::parse_response::<Account>(res)
     }
 
-    fn form_encode(map: &BTreeMap<String, String>) -> Vec<u8> {
+    pub fn update_account(
+        &self,
+        account_id: &str,
+        update_params: &BTreeMap<String, String>
+    ) -> Result<Account> {
+        let url = StripeClient::path(format!("/accounts/{}", account_id));
+        let body = StripeClient::encode_body(update_params);
+
+        let res = self.client.post(&url)
+            .header(self.authorization_header())
+            .body(body.as_slice())
+            .send()?;
+
+        StripeClient::parse_response::<Account>(res)
+    }
+
+    fn encode_params(params: &BTreeMap<String, String>) -> String {
+        let mut param_string = String::new();
+        if params.is_empty() {
+            param_string
+        } else {
+            for (key, value) in params {
+                param_string.push_str(key);
+                param_string.push('=');
+                param_string.push_str(value);
+                param_string.push('&');
+            }
+            param_string.pop();
+            param_string
+        }
+
+    }
+
+    fn encode_body(map: &BTreeMap<String, String>) -> Vec<u8> {
         let mut body = String::new();
         for (key, value) in map {
             body.push_str(key);
@@ -91,7 +138,7 @@ impl StripeClient {
         body.into_bytes()
     }
 
-    fn endpoint(suffix: &str) -> String {
+    fn path(suffix: String) -> String {
         if suffix.starts_with("/") {
             format!("{}{}", BASE_URL, suffix)
         } else {
@@ -99,7 +146,11 @@ impl StripeClient {
         }
     }
 
-    fn parse_response<T: Deserialize>(res: &mut Response) -> Result<T> {
+    fn endpoint(suffix: &str) -> String {
+        StripeClient::path(String::from(suffix))
+    }
+
+    fn parse_response<T: Deserialize>(mut res: Response) -> Result<T> {
         match res.status {
             StatusCode::Ok => {
                 let mut body = String::new();
@@ -110,11 +161,11 @@ impl StripeClient {
             _ => {
                 let mut body = String::new();
                 res.read_to_string(&mut body)?;
-                let err = stripe_error::parse(&body)?;
+                println!("{}", &body);
+                let err = serde_json::from_str::<stripe_error::StripeErrorWrapper>(&body)?.error;
                 Err(Error::StripeError(err))
             }
         }
-
     }
 
     fn authorization_header(&self) -> Authorization<Basic> {
@@ -124,8 +175,9 @@ impl StripeClient {
         })
     }
 
-    fn idempotent(&self, headers: &mut Headers, key: &str) {
-        headers.set(IdempotencyKey::new(key));
+    fn idempotent(&self, headers: &mut Headers) {
+        let key: String = rand::thread_rng().gen_ascii_chars().take(15).collect();
+        headers.set(IdempotencyKey::new(&key));
     }
 }
 
