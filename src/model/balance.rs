@@ -1,7 +1,8 @@
 use super::money::Money;
 
-struct Balance {
-    available: Vec<Money>,
-    livemode: bool,
-    pending: Vec<Money>
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Balance {
+    pub available: Vec<Money>,
+    pub livemode: bool,
+    pub pending: Vec<Money>
 }

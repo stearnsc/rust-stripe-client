@@ -1,28 +1,33 @@
-#[derive(Debug, Serialize, Deserialize)]
-struct Charge {
-    id: String,
-    amount: i64,
-    amount_refunded: i64,
-    application_fee: Option<String>,
-    balance_transaction: String,
-    captured: bool,
-    created: i64,
-    currency: String,
-    customer: String,
-    description: Option<String>,
-    dispute: Option<Dispute>,
-    failure_code: Option<String>,
-    failure_message: Option<String>,
-    fraud_details: Option<BTreeMap<String, String>>,
-    invoice: Option<String>,
-    livemode: bool,
-    metadata: Option<BTreeMap<String, String>>,
-    order: Option<String>,
-    paid: bool,
-    receipt_email: String,
-    receipt_number: String,
-    refunded: bool,
-    refunds: ApiList<Refund>,
-    shipping: Option<Shipping>,
+use std::collections::BTreeMap;
+use super::api_list::ApiList;
+use super::dispute::Dispute;
+use super::refund::Refund;
+use super::shipping::Shipping;
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Charge {
+    pub id: String,
+    pub amount: i64,
+    pub amount_refunded: i64,
+    pub application_fee: Option<String>,
+    pub balance_transaction: String,
+    pub captured: bool,
+    pub created: i64,
+    pub currency: String,
+    pub customer: String,
+    pub description: Option<String>,
+    pub dispute: Option<Dispute>,
+    pub failure_code: Option<String>,
+    pub failure_message: Option<String>,
+    pub fraud_details: Option<BTreeMap<String, String>>,
+    pub invoice: Option<String>,
+    pub livemode: bool,
+    pub metadata: Option<BTreeMap<String, String>>,
+    pub order: Option<String>,
+    pub paid: bool,
+    pub receipt_email: String,
+    pub receipt_number: String,
+    pub refunded: bool,
+    pub refunds: ApiList<Refund>,
+    pub shipping: Option<Shipping>,
 }
