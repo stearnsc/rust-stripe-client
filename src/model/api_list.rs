@@ -1,10 +1,9 @@
-use serde::de::Deserialize;
-use serde::ser::Serialize;
+use super::StripeObject;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ApiList<T: Serialize + Deserialize> {
-    data: Vec<T>,
-    has_more: bool,
-    total_count: i64,
-    url: String
+#[derive(Debug, Clone, Deserialize)]
+pub struct ApiList<T: StripeObject> {
+    pub data: Vec<T>,
+    pub has_more: bool,
+    pub total_count: i64,
+    pub url: String
 }

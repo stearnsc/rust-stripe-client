@@ -1,9 +1,10 @@
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
 use super::legal_entity::LegalEntity;
+use super::StripeObject;
 use super::verification::Verification;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Account {
     pub id: String,
     pub business_name: Option<String>,
@@ -32,27 +33,33 @@ pub struct Account {
     pub verification: Option<Verification>
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct DeclineChargeOn {
     pub avs_failure: bool,
     pub cvs_failure: bool
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ExternalAccount {
     pub id: String,
     pub customer: String,
     pub account: String
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+impl StripeObject for ExternalAccount {
+    fn id(&self) -> &str {
+        &self.id
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct TosAcceptance {
     date: i64,
     ip: String,
     user_agent: String
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct TransferSchedule {
     delay_days: i64,
     interval: String,

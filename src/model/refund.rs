@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 use super::balance_transaction::BalanceTransaction;
+use super::StripeObject;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Refund {
     pub id: String,
     pub amount: i64,
@@ -13,4 +14,10 @@ pub struct Refund {
     pub metadata: Option<BTreeMap<String, String>>,
     pub reason: String,
     pub receipt_number: String
+}
+
+impl StripeObject for Refund {
+    fn id(&self) -> &str {
+        &self.id
+    }
 }

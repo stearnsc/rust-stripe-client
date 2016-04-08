@@ -4,7 +4,7 @@ use super::dispute::Dispute;
 use super::refund::Refund;
 use super::shipping::Shipping;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Charge {
     pub id: String,
     pub amount: i64,

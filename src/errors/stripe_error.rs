@@ -2,12 +2,12 @@ use std;
 use serde;
 use custom_ser::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct StripeErrorWrapper {
     pub error: StripeError
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct StripeError {
     #[serde(rename="type")]
     pub kind: StripeErrorKind,

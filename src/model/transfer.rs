@@ -3,8 +3,9 @@ use serde;
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
 use super::source_type::SourceType;
+use super::StripeObject;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Transfer {
     pub id: String,
     pub amount: i64,
@@ -29,6 +30,12 @@ pub struct Transfer {
     pub status: TransferStatus,
     #[serde(rename="type")]
     pub transfer_type: TransferType
+}
+
+impl StripeObject for Transfer {
+    fn id(&self) -> &str {
+        &self.id
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -148,7 +155,7 @@ impl TransferFailureCode {
 
 simple_serde!(TransferFailureCode, TransferFailureCode::to_string, TransferFailureCode::from_str);
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Reversal {
     pub id: String,
     pub amount: i64,
@@ -157,4 +164,10 @@ pub struct Reversal {
     pub currency: String,
     pub metadata: BTreeMap<String, String>,
     pub transfer: String
+}
+
+impl StripeObject for Reversal {
+    fn id(&self) -> &str {
+        &self.id
+    }
 }

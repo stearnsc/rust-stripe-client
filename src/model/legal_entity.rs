@@ -5,7 +5,7 @@ use super::date_of_birth::DateOfBirth;
 use super::owner::Owner;
 use super::verification::Verification;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct LegalEntity {
     #[serde(rename="type")]
     pub entity_type: String,

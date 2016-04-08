@@ -1,6 +1,6 @@
 use super::address::Address;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Shipping {
     pub address: Address,
     pub carrier: String,

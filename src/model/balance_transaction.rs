@@ -3,7 +3,7 @@ use serde;
 use super::api_list::ApiList;
 use super::transfer::Transfer;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct BalanceTransaction {
     pub id: String,
     pub amount: i64,
@@ -21,7 +21,7 @@ pub struct BalanceTransaction {
     pub transaction_type: TransactionType
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct FeeDetails {
     pub amount: i64,
     pub application: String,

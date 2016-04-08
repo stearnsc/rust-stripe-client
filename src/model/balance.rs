@@ -1,6 +1,6 @@
 use super::money::Money;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Balance {
     pub available: Vec<Money>,
     pub livemode: bool,

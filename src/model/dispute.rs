@@ -2,8 +2,9 @@ use custom_ser::*;
 use serde;
 use std::collections::BTreeMap;
 use super::balance_transaction::BalanceTransaction;
+use super::StripeObject;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Dispute {
     pub id: String,
     pub amount: i64,
@@ -20,38 +21,43 @@ pub struct Dispute {
     pub status: DisputeStatus,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+impl StripeObject for Dispute {
+    fn id(&self) -> &str {
+        &self.id
+    }
+}
+#[derive(Debug, Clone, Deserialize)]
 pub struct DisputeEvidence {
-    access_activity_log: Option<String>,
-    billing_address: Option<String>,
-    cancellation_policy: Option<String>,
-    cancellation_policy_disclosure: Option<String>,
-    cancellation_rebuttal: Option<String>,
-    customer_communication: Option<String>,
-    customer_email_address: Option<String>,
-    customer_name: Option<String>,
-    customer_purchase_ip: Option<String>,
-    customer_signature: Option<String>,
-    duplicate_charge_documentation: Option<String>,
-    duplicate_charge_explanation: Option<String>,
-    duplicate_charge_id: Option<String>,
-    product_description: Option<String>,
-    receipt: Option<String>,
-    refund_policy: Option<String>,
-    refund_policy_disclosure: Option<String>,
-    refund_refusal_explanation: Option<String>,
-    service_date: Option<String>,
-    service_documentation: Option<String>,
-    shipping_address: Option<String>,
-    shipping_carrier: Option<String>,
-    shipping_date: Option<String>,
-    shipping_documentation: Option<String>,
-    shipping_tracking_number: Option<String>,
-    uncategorized_file: Option<String>,
-    uncategorized_text: Option<String>,
+    pub access_activity_log: Option<String>,
+    pub billing_address: Option<String>,
+    pub cancellation_policy: Option<String>,
+    pub cancellation_policy_disclosure: Option<String>,
+    pub cancellation_rebuttal: Option<String>,
+    pub customer_communication: Option<String>,
+    pub customer_email_address: Option<String>,
+    pub customer_name: Option<String>,
+    pub customer_purchase_ip: Option<String>,
+    pub customer_signature: Option<String>,
+    pub duplicate_charge_documentation: Option<String>,
+    pub duplicate_charge_explanation: Option<String>,
+    pub duplicate_charge_id: Option<String>,
+    pub product_description: Option<String>,
+    pub receipt: Option<String>,
+    pub refund_policy: Option<String>,
+    pub refund_policy_disclosure: Option<String>,
+    pub refund_refusal_explanation: Option<String>,
+    pub service_date: Option<String>,
+    pub service_documentation: Option<String>,
+    pub shipping_address: Option<String>,
+    pub shipping_carrier: Option<String>,
+    pub shipping_date: Option<String>,
+    pub shipping_documentation: Option<String>,
+    pub shipping_tracking_number: Option<String>,
+    pub uncategorized_file: Option<String>,
+    pub uncategorized_text: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct EvidenceDetails {
     due_by: Option<i64>,
     has_evidence: bool,
