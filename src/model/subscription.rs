@@ -1,4 +1,3 @@
-use custom_ser::*;
 use serde;
 use std::collections::BTreeMap;
 use super::discount::Discount;
@@ -63,28 +62,17 @@ pub enum SubscriptionStatus {
     Unknown(String),
 }
 
-impl SubscriptionStatus {
-    fn from_str(s: &str) -> SubscriptionStatus {
-        match s {
+impl serde::Deserialize for SubscriptionStatus {
+    fn deserialize<D>(deserializer: &mut D) -> Result<SubscriptionStatus, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "trialing" => SubscriptionStatus::Trialing,
             "active"   => SubscriptionStatus::Active,
             "past_due" => SubscriptionStatus::PastDue,
             "canceled" => SubscriptionStatus::Canceled,
             "unpaid"   => SubscriptionStatus::Unpaid,
             unknown    => SubscriptionStatus::Unknown(String::from(unknown)),
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            SubscriptionStatus::Trialing       => "trialing",
-            SubscriptionStatus::Active         => "active",
-            SubscriptionStatus::PastDue        => "past_due",
-            SubscriptionStatus::Canceled       => "canceled",
-            SubscriptionStatus::Unpaid         => "unpaid",
-            SubscriptionStatus::Unknown(ref s) => s,
         })
     }
 }
-
-simple_serde!(SubscriptionStatus, SubscriptionStatus::to_string, SubscriptionStatus::from_str);

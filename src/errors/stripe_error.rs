@@ -1,6 +1,5 @@
 use std;
 use serde;
-use custom_ser::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct StripeErrorWrapper {
@@ -27,11 +26,11 @@ pub enum StripeErrorKind {
     Unknown(String)
 }
 
-impl StripeErrorKind {
-    fn from_str<E>(s: &str) -> Result<StripeErrorKind, E>
-        where E: serde::de::Error
+impl serde::Deserialize for StripeErrorKind {
+    fn deserialize<D>(deserializer: &mut D) -> Result<StripeErrorKind, D::Error>
+        where D: serde::Deserializer
     {
-        Ok(match s {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "api_connection_error"  => StripeErrorKind::ApiConnectionError,
             "api_error"             => StripeErrorKind::ApiError,
             "authentication_error"  => StripeErrorKind::AuthenticationError,
@@ -39,18 +38,6 @@ impl StripeErrorKind {
             "invalid_request_error" => StripeErrorKind::InvalidRequestError,
             "rate_limit_error"      => StripeErrorKind::RateLimitError,
             unknown_kind            => StripeErrorKind::Unknown(String::from(unknown_kind))
-        })
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            StripeErrorKind::ApiConnectionError   => "api_connection_error",
-            StripeErrorKind::ApiError             => "api_error",
-            StripeErrorKind::AuthenticationError  => "authentication_error",
-            StripeErrorKind::CardError            => "card_error",
-            StripeErrorKind::InvalidRequestError  => "invalid_request_error",
-            StripeErrorKind::RateLimitError       => "rate_limit_error",
-            StripeErrorKind::Unknown(ref unknown) => unknown
         })
     }
 }
@@ -71,11 +58,11 @@ pub enum StripeErrorCode {
     Unknown(String)
 }
 
-impl StripeErrorCode {
-    fn from_str<E>(s: &str) -> Result<StripeErrorCode, E>
-        where E: serde::de::Error
+impl serde::Deserialize for StripeErrorCode {
+    fn deserialize<D>(deserializer: &mut D) -> Result<StripeErrorCode, D::Error>
+        where D: serde::Deserializer
     {
-        Ok(match s {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "invalid_number"       => StripeErrorCode::InvalidNumber,
             "invalid_expiry_month" => StripeErrorCode::InvalidExpiryMonth,
             "invalid_expirty_year" => StripeErrorCode::InvalidExpiryYear,
@@ -88,23 +75,6 @@ impl StripeErrorCode {
             "missing"              => StripeErrorCode::Missing,
             "processing_error"     => StripeErrorCode::ProcessingError,
             unknown_code           => StripeErrorCode::Unknown(String::from(unknown_code))
-        })
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            StripeErrorCode::InvalidNumber      => "invalid_number",
-            StripeErrorCode::InvalidExpiryMonth => "invalid_expiry_month",
-            StripeErrorCode::InvalidExpiryYear  => "invalid_expirty_year",
-            StripeErrorCode::InvalidCvC         => "invalid_cvc",
-            StripeErrorCode::IncorrectNumber    => "incorrect_number",
-            StripeErrorCode::ExpiredCard        => "expired_card",
-            StripeErrorCode::IncorrectCvc       => "incorrect_cvc",
-            StripeErrorCode::IncorrectZip       => "incorrect_zip",
-            StripeErrorCode::CardDeclined       => "card_declined",
-            StripeErrorCode::Missing            => "missing",
-            StripeErrorCode::ProcessingError    => "processing_error",
-            StripeErrorCode::Unknown(ref s)     => s
         })
     }
 }
@@ -135,6 +105,3 @@ impl std::fmt::Display for StripeError {
         )
     }
 }
-
-custom_string_serde!(StripeErrorKind, StripeErrorKind::to_string, StripeErrorKind::from_str);
-custom_string_serde!(StripeErrorCode, StripeErrorCode::to_string, StripeErrorCode::from_str);

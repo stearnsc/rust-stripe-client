@@ -1,9 +1,10 @@
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
+use super::discount::Discount;
 use super::shipping::Shipping;
 use super::source::Source;
+use super::StripeObject;
 use super::subscription::Subscription;
-use super::discount::Discount;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Customer {
@@ -21,4 +22,10 @@ pub struct Customer {
     shipping: Option<Shipping>,
     sources: Option<ApiList<Source>>,
     subscriptions: Option<ApiList<Subscription>>,
+}
+
+impl StripeObject for Customer {
+    fn id(&self) -> &str {
+        &self.id
+    }
 }

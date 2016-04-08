@@ -1,4 +1,3 @@
-use custom_ser::*;
 use serde;
 
 #[derive(Clone, Debug)]
@@ -10,26 +9,16 @@ pub enum Interval {
     Unknown(String),
 }
 
-impl Interval {
-    fn from_str(s: &str) -> Interval {
-        match s {
+impl serde::Deserialize for Interval {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Interval, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "day"   => Interval::Day,
             "week"  => Interval::Week,
             "month" => Interval::Month,
             "year"  => Interval::Year,
             unknown => Interval::Unknown(String::from(unknown)),
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            Interval::Day            => "day",
-            Interval::Week           => "week",
-            Interval::Month          => "month",
-            Interval::Year           => "year",
-            Interval::Unknown(ref s) => s
         })
     }
 }
-
-simple_serde!(Interval, Interval::to_string, Interval::from_str);

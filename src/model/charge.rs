@@ -3,8 +3,9 @@ use super::api_list::ApiList;
 use super::dispute::Dispute;
 use super::refund::Refund;
 use super::shipping::Shipping;
+use super::StripeObject;
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Charge {
     pub id: String,
     pub amount: i64,
@@ -30,4 +31,10 @@ pub struct Charge {
     pub refunded: bool,
     pub refunds: ApiList<Refund>,
     pub shipping: Option<Shipping>,
+}
+
+impl StripeObject for Charge {
+    fn id(&self) -> &str {
+        &self.id
+    }
 }

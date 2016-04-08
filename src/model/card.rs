@@ -1,4 +1,3 @@
-use custom_ser::*;
 use serde;
 use std::collections::BTreeMap;
 use super::customer::Customer;
@@ -42,29 +41,19 @@ pub enum Check {
     Unknown(String),
 }
 
-impl Check {
-    fn from_str(s: &str) -> Check {
-        match s {
+impl serde::Deserialize for Check {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Check, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "pass"        => Check::Pass,
             "fail"        => Check::Fail,
             "unavailable" => Check::Unavailable,
             "unchecked"   => Check::Unchecked,
-            unknown       => Check::Unknown(String::from(unknown))
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            Check::Pass           => "pass",
-            Check::Fail           => "fail",
-            Check::Unavailable    => "unavailable",
-            Check::Unchecked      => "unchecked",
-            Check::Unknown(ref s) => s,
+            unknown       => Check::Unknown(String::from(unknown)),
         })
     }
 }
-
-simple_serde!(Check, Check::to_string, Check::from_str);
 
 #[derive(Clone, Debug)]
 pub enum CardType {
@@ -74,27 +63,18 @@ pub enum CardType {
     Unknown(String)
 }
 
-impl CardType {
-    fn from_str(s: &str) -> CardType {
-        match s {
+impl serde::Deserialize for CardType {
+    fn deserialize<D>(deserializer: &mut D) -> Result<CardType, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "credit"  => CardType::Credit,
             "debit"   => CardType::Debit,
             "prepaid" => CardType::Prepaid,
             unknown   => CardType::Unknown(String::from(unknown)),
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            CardType::Credit         => "credit",
-            CardType::Debit          => "debit",
-            CardType::Prepaid        => "prepaid",
-            CardType::Unknown(ref s) => s,
         })
     }
 }
-
-simple_serde!(CardType, CardType::to_string, CardType::from_str);
 
 #[derive(Clone, Debug)]
 pub enum TokenizationMethod {
@@ -103,25 +83,17 @@ pub enum TokenizationMethod {
     Unknown(String),
 }
 
-impl TokenizationMethod {
-    fn from_str(s: &str) -> TokenizationMethod {
-        match s {
+impl serde::Deserialize for TokenizationMethod {
+    fn deserialize<D>(deserializer: &mut D) -> Result<TokenizationMethod, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "android_pay" => TokenizationMethod::AndroidPay,
             "apple_pay"   => TokenizationMethod::ApplePay,
             unknown       => TokenizationMethod::Unknown(String::from(unknown)),
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            TokenizationMethod::AndroidPay     => "android_pay",
-            TokenizationMethod::ApplePay       => "apple_pay",
-            TokenizationMethod::Unknown(ref s) => s,
         })
     }
 }
-
-simple_serde!(TokenizationMethod, TokenizationMethod::to_string, TokenizationMethod::from_str);
 
 #[derive(Clone, Debug)]
 pub enum CardBrand {
@@ -134,9 +106,11 @@ pub enum CardBrand {
     Unknown(String)
 }
 
-impl CardBrand {
-    fn from_str(s: &str) -> CardBrand {
-        match s {
+impl serde::Deserialize for CardBrand {
+    fn deserialize<D>(deserializer: &mut D) -> Result<CardBrand, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "Visa"             => CardBrand::Visa,
             "American Express" => CardBrand::AmericanExpress,
             "MasterCard"       => CardBrand::MasterCard,
@@ -144,20 +118,6 @@ impl CardBrand {
             "JCB"              => CardBrand::Jcb,
             "Diners Club"      => CardBrand::DinersClub,
             unknown            => CardBrand::Unknown(String::from(unknown)),
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            CardBrand::Visa            => "Visa",
-            CardBrand::AmericanExpress => "American Express",
-            CardBrand::MasterCard      => "MasterCard",
-            CardBrand::Discover        => "Discover",
-            CardBrand::Jcb             => "JCB",
-            CardBrand::DinersClub      => "Diners Club",
-            CardBrand::Unknown(ref s)  => s,
         })
     }
 }
-
-simple_serde!(CardBrand, CardBrand::to_string, CardBrand::from_str);

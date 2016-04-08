@@ -33,6 +33,12 @@ pub struct Account {
     pub verification: Option<Verification>
 }
 
+impl StripeObject for Account {
+    fn id(&self) -> &str {
+        &self.id
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct DeclineChargeOn {
     pub avs_failure: bool,

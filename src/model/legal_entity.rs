@@ -1,4 +1,3 @@
-use custom_ser::*;
 use serde;
 use super::address::Address;
 use super::date_of_birth::DateOfBirth;
@@ -29,22 +28,14 @@ pub enum LegalEntityType {
     Unknown(String)
 }
 
-impl LegalEntityType {
-    fn from_str(s: &str) -> LegalEntityType {
-        match s {
+impl serde::Deserialize for LegalEntityType {
+    fn deserialize<D>(deserializer: &mut D) -> Result<LegalEntityType, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "individual" => LegalEntityType::Individual,
             "company"    => LegalEntityType::Company,
-            unknown      => LegalEntityType::Unknown(String::from(unknown))
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            LegalEntityType::Individual     => "individual",
-            LegalEntityType::Company        => "company",
-            LegalEntityType::Unknown(ref s) => s
+            unknown      => LegalEntityType::Unknown(String::from(unknown)),
         })
     }
 }
-
-simple_serde!(LegalEntityType, LegalEntityType::to_string, LegalEntityType::from_str);

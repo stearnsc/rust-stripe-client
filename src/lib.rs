@@ -15,9 +15,6 @@ use serde::de::Deserialize;
 use std::collections::BTreeMap;
 use std::io::Read;
 
-#[macro_use]
-mod custom_ser;
-
 pub mod errors;
 pub mod model;
 
@@ -51,295 +48,295 @@ impl StripeClient {
         }
     }
 
-    // /// https://stripe.com/docs/api#retrieve_account
-    // /// Fetch account associated with self.key
-    // pub fn retrieve_current_account(&self) -> Result<Account> {
-    //     let url = StripeClient::endpoint("/account");
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
+    /// https://stripe.com/docs/api#retrieve_account
+    /// Fetch account associated with self.key
+    pub fn retrieve_current_account(&self) -> Result<Account> {
+        let url = StripeClient::endpoint("/account");
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
 
-    //     StripeClient::parse_response(res)
-    // }
+        StripeClient::parse_response(res)
+    }
 
-    // /// https://stripe.com/docs/api#retrieve_account
-    // pub fn retrieve_account(&self, account_id: &str) -> Result<Account> {
-    //     let url = StripeClient::endpoint(&format!("/accounts/{}", account_id));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
+    /// https://stripe.com/docs/api#retrieve_account
+    pub fn retrieve_account(&self, account_id: &str) -> Result<Account> {
+        let url = StripeClient::endpoint(&format!("/accounts/{}", account_id));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
 
-    //     StripeClient::parse_response(res)
-    // }
+        StripeClient::parse_response(res)
+    }
 
-    // /// https://stripe.com/docs/api#create_account
-    // pub fn create_account(&self, params: &BTreeMap<String, String>) -> Result<Account> {
-    //     let url = StripeClient::endpoint("/accounts");
-    //     let body = params.encoded_string();
-    //     let res = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes())
-    //         .send()?;
+    /// https://stripe.com/docs/api#create_account
+    pub fn create_account(&self, params: &BTreeMap<String, String>) -> Result<Account> {
+        let url = StripeClient::endpoint("/accounts");
+        let body = params.encoded_string();
+        let res = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes())
+            .send()?;
 
-    //     StripeClient::parse_response::<Account>(res)
-    // }
+        StripeClient::parse_response::<Account>(res)
+    }
 
-    // /// https://stripe.com/docs/api#update_account
-    // pub fn update_account(
-    //     &self,
-    //     account_id: &str,
-    //     update_params: &BTreeMap<String, String>
-    // ) -> Result<Account> {
-    //     let url = StripeClient::endpoint(&format!("/accounts/{}", account_id));
-    //     let body = update_params.encoded_string();
-    //     let res = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes())
-    //         .send()?;
+    /// https://stripe.com/docs/api#update_account
+    pub fn update_account(
+        &self,
+        account_id: &str,
+        update_params: &BTreeMap<String, String>
+    ) -> Result<Account> {
+        let url = StripeClient::endpoint(&format!("/accounts/{}", account_id));
+        let body = update_params.encoded_string();
+        let res = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes())
+            .send()?;
 
-    //     StripeClient::parse_response::<Account>(res)
-    // }
+        StripeClient::parse_response::<Account>(res)
+    }
 
-    // /// https://stripe.com/docs/api#delete_account
-    // pub fn delete_account(&self, account_id: &str) -> Result<Delete> {
-    //     let url = StripeClient::endpoint(&format!("/accounts/{}", account_id));
-    //     let res = self.client.delete(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<Delete>(res)
-    // }
+    /// https://stripe.com/docs/api#delete_account
+    pub fn delete_account(&self, account_id: &str) -> Result<Delete> {
+        let url = StripeClient::endpoint(&format!("/accounts/{}", account_id));
+        let res = self.client.delete(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<Delete>(res)
+    }
 
-    // /// https://stripe.com/docs/api#reject_account
-    // pub fn reject_account(
-    //     &self,
-    //     account_id: &str,
-    //     reason: &AccountRejectReason
-    // ) -> Result<Account> {
-    //     let url = StripeClient::endpoint(&format!("/accounts/{}/reject", account_id));
-    //     let body = serde_json::to_string(reason)?;
-    //     let res = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes())
-    //         .send()?;
+    /// https://stripe.com/docs/api#reject_account
+    pub fn reject_account(
+        &self,
+        account_id: &str,
+        reason: &AccountRejectReason
+    ) -> Result<Account> {
+        let url = StripeClient::endpoint(&format!("/accounts/{}/reject", account_id));
+        let body = serde_json::to_string(reason)?;
+        let res = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes())
+            .send()?;
 
-    //     StripeClient::parse_response::<Account>(res)
-    // }
+        StripeClient::parse_response::<Account>(res)
+    }
 
-    // /// https://stripe.com/docs/api#list_accounts
-    // pub fn list_connected_accounts(
-    //     &self,
-    //     params: &BTreeMap<String, String>
-    // ) -> Result<ApiList<Account>> {
-    //     let url = StripeClient::endpoint(&format!("/accounts?{}", params.encoded_string()));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
+    /// https://stripe.com/docs/api#list_accounts
+    pub fn list_connected_accounts(
+        &self,
+        params: &BTreeMap<String, String>
+    ) -> Result<ApiList<Account>> {
+        let url = StripeClient::endpoint(&format!("/accounts?{}", params.encoded_string()));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
 
-    //     StripeClient::parse_response::<ApiList<Account>>(res)
-    // }
+        StripeClient::parse_response::<ApiList<Account>>(res)
+    }
 
-    // /// https://stripe.com/docs/api#retrieve_balance
-    // pub fn retrieve_balance(&self) -> Result<Balance> {
-    //     let url = StripeClient::endpoint("/balance");
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<Balance>(res)
-    // }
+    /// https://stripe.com/docs/api#retrieve_balance
+    pub fn retrieve_balance(&self) -> Result<Balance> {
+        let url = StripeClient::endpoint("/balance");
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<Balance>(res)
+    }
 
-    // /// https://stripe.com/docs/api#retrieve_balance_transaction
-    // pub fn retrieve_balance_transaction(
-    //     &self,
-    //     balance_transaction_id: &str
-    // ) -> Result<BalanceTransaction> {
-    //     let url = StripeClient::endpoint(&format!("/balance/history/{}", balance_transaction_id));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<BalanceTransaction>(res)
-    // }
+    /// https://stripe.com/docs/api#retrieve_balance_transaction
+    pub fn retrieve_balance_transaction(
+        &self,
+        balance_transaction_id: &str
+    ) -> Result<BalanceTransaction> {
+        let url = StripeClient::endpoint(&format!("/balance/history/{}", balance_transaction_id));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<BalanceTransaction>(res)
+    }
 
-    // /// https://stripe.com/docs/api#balance_history
-    // pub fn list_balance_history(
-    //     &self,
-    //     params: &BTreeMap<String, String>
-    // ) -> Result<ApiList<BalanceTransaction>> {
-    //     let url = StripeClient::endpoint(&format!("/balance/history?{}", params.encoded_string()));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<ApiList<BalanceTransaction>>(res)
-    // }
+    /// https://stripe.com/docs/api#balance_history
+    pub fn list_balance_history(
+        &self,
+        params: &BTreeMap<String, String>
+    ) -> Result<ApiList<BalanceTransaction>> {
+        let url = StripeClient::endpoint(&format!("/balance/history?{}", params.encoded_string()));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<ApiList<BalanceTransaction>>(res)
+    }
 
-    // /// https://stripe.com/docs/api#create_charge
-    // pub fn create_charge(
-    //     &self,
-    //     params: &BTreeMap<String, String>,
-    //     idempotency_key: Option<&str>
-    // ) -> Result<Charge> {
-    //     let url = StripeClient::endpoint("/charges");
-    //     let body = params.encoded_string();
-    //     let mut req_builder = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes());
+    /// https://stripe.com/docs/api#create_charge
+    pub fn create_charge(
+        &self,
+        params: &BTreeMap<String, String>,
+        idempotency_key: Option<&str>
+    ) -> Result<Charge> {
+        let url = StripeClient::endpoint("/charges");
+        let body = params.encoded_string();
+        let mut req_builder = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes());
 
-    //     if let Some(idempotency_key) = idempotency_key {
-    //         req_builder = req_builder.header(IdempotencyKey::new(idempotency_key));
-    //     }
+        if let Some(idempotency_key) = idempotency_key {
+            req_builder = req_builder.header(IdempotencyKey::new(idempotency_key));
+        }
 
-    //     let res = req_builder.send()?;
+        let res = req_builder.send()?;
 
-    //     StripeClient::parse_response::<Charge>(res)
-    // }
+        StripeClient::parse_response::<Charge>(res)
+    }
 
-    // /// https://stripe.com/docs/api#retrieve_charge
-    // pub fn retrieve_charge(&self, charge_id: &str) -> Result<Charge> {
-    //     let url = StripeClient::endpoint(&format!("/charges/{}", charge_id));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<Charge>(res)
-    // }
+    /// https://stripe.com/docs/api#retrieve_charge
+    pub fn retrieve_charge(&self, charge_id: &str) -> Result<Charge> {
+        let url = StripeClient::endpoint(&format!("/charges/{}", charge_id));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<Charge>(res)
+    }
 
-    // /// https://stripe.com/docs/api#update_charge
-    // pub fn update_charge(
-    //     &self,
-    //     charge_id: &str,
-    //     update: BTreeMap<String, String>
-    // ) -> Result<Charge> {
-    //     let url = StripeClient::endpoint(&format!("/charges/{}", charge_id));
-    //     let body = update.encoded_string();
-    //     let res = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes())
-    //         .send()?;
-    //     StripeClient::parse_response::<Charge>(res)
-    // }
+    /// https://stripe.com/docs/api#update_charge
+    pub fn update_charge(
+        &self,
+        charge_id: &str,
+        update: BTreeMap<String, String>
+    ) -> Result<Charge> {
+        let url = StripeClient::endpoint(&format!("/charges/{}", charge_id));
+        let body = update.encoded_string();
+        let res = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes())
+            .send()?;
+        StripeClient::parse_response::<Charge>(res)
+    }
 
-    // /// https://stripe.com/docs/api#capture_charge
-    // pub fn capture_charge(
-    //     &self,
-    //     charge_id: &str,
-    //     params: &BTreeMap<String, String>
-    // ) -> Result<Charge> {
-    //     let url = StripeClient::endpoint(&format!("/charges/{}", charge_id));
-    //     let body = params.encoded_string();
-    //     let res = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes())
-    //         .send()?;
+    /// https://stripe.com/docs/api#capture_charge
+    pub fn capture_charge(
+        &self,
+        charge_id: &str,
+        params: &BTreeMap<String, String>
+    ) -> Result<Charge> {
+        let url = StripeClient::endpoint(&format!("/charges/{}", charge_id));
+        let body = params.encoded_string();
+        let res = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes())
+            .send()?;
 
-    //     StripeClient::parse_response::<Charge>(res)
-    // }
+        StripeClient::parse_response::<Charge>(res)
+    }
 
-    // /// https://stripe.com/docs/api#list_charges
-    // pub fn list_charges(&self, params: &BTreeMap<String, String>) -> Result<ApiList<Charge>> {
-    //     let params = params.encoded_string();
-    //     let url = StripeClient::endpoint(&format!("/charges?{}", params));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<ApiList<Charge>>(res)
-    // }
+    /// https://stripe.com/docs/api#list_charges
+    pub fn list_charges(&self, params: &BTreeMap<String, String>) -> Result<ApiList<Charge>> {
+        let params = params.encoded_string();
+        let url = StripeClient::endpoint(&format!("/charges?{}", params));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<ApiList<Charge>>(res)
+    }
 
-    // /// https://stripe.com/docs/api#create_customer
-    // pub fn create_customer(
-    //     &self,
-    //     params: Option<&BTreeMap<String, String>>
-    // ) -> Result<Customer> {
-    //     let url = StripeClient::endpoint("/customers");
-    //     let body = params.map(|p| p.encoded_string()).unwrap_or(String::new());
-    //     let res = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes())
-    //         .send()?;
-    //     StripeClient::parse_response::<Customer>(res)
-    // }
+    /// https://stripe.com/docs/api#create_customer
+    pub fn create_customer(
+        &self,
+        params: Option<&BTreeMap<String, String>>
+    ) -> Result<Customer> {
+        let url = StripeClient::endpoint("/customers");
+        let body = params.map(|p| p.encoded_string()).unwrap_or(String::new());
+        let res = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes())
+            .send()?;
+        StripeClient::parse_response::<Customer>(res)
+    }
 
-    // /// https://stripe.com/docs/api#retrieve_customer
-    // pub fn retrieve_customer(&self, customer_id: &str) -> Result<Customer> {
-    //     let url = StripeClient::endpoint(&format!("/customers/{}", customer_id));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<Customer>(res)
-    // }
+    /// https://stripe.com/docs/api#retrieve_customer
+    pub fn retrieve_customer(&self, customer_id: &str) -> Result<Customer> {
+        let url = StripeClient::endpoint(&format!("/customers/{}", customer_id));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<Customer>(res)
+    }
 
-    // /// https://stripe.com/docs/api#update_customer
-    // pub fn update_customer(
-    //     &self,
-    //     customer_id: &str,
-    //     params: &BTreeMap<String, String>
-    // ) -> Result<Customer> {
-    //     let url = StripeClient::endpoint(&format!("/customers/{}", customer_id));
-    //     let body = params.encoded_string();
-    //     let res = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes())
-    //         .send()?;
-    //     StripeClient::parse_response::<Customer>(res)
-    // }
+    /// https://stripe.com/docs/api#update_customer
+    pub fn update_customer(
+        &self,
+        customer_id: &str,
+        params: &BTreeMap<String, String>
+    ) -> Result<Customer> {
+        let url = StripeClient::endpoint(&format!("/customers/{}", customer_id));
+        let body = params.encoded_string();
+        let res = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes())
+            .send()?;
+        StripeClient::parse_response::<Customer>(res)
+    }
 
-    // /// https://stripe.com/docs/api#delete_customer
-    // pub fn delete_customer(&self, customer_id: &str) -> Result<Delete> {
-    //     let url = StripeClient::endpoint(&format!("/customers/{}", customer_id));
-    //     let res = self.client.delete(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<Delete>(res)
-    // }
+    /// https://stripe.com/docs/api#delete_customer
+    pub fn delete_customer(&self, customer_id: &str) -> Result<Delete> {
+        let url = StripeClient::endpoint(&format!("/customers/{}", customer_id));
+        let res = self.client.delete(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<Delete>(res)
+    }
 
-    // /// https://stripe.com/docs/api#list_customers
-    // pub fn list_customers(
-    //     &self,
-    //     params: &BTreeMap<String, String>
-    // ) -> Result<ApiList<Customer>> {
-    //     let url = StripeClient::endpoint(&format!("/customers?{}", params.encoded_string()));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<ApiList<Customer>>(res)
-    // }
+    /// https://stripe.com/docs/api#list_customers
+    pub fn list_customers(
+        &self,
+        params: &BTreeMap<String, String>
+    ) -> Result<ApiList<Customer>> {
+        let url = StripeClient::endpoint(&format!("/customers?{}", params.encoded_string()));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<ApiList<Customer>>(res)
+    }
 
-    // /// https://stripe.com/docs/api#retrieve_dispute
-    // pub fn retrieve_dispute(&self, dispute_id: &str) -> Result<Dispute> {
-    //     let url = StripeClient::endpoint(&format!("/disputes/{}", dispute_id));
-    //     let res = self.client.get(&url)
-    //         .headers(self.default_headers())
-    //         .send()?;
-    //     StripeClient::parse_response::<Dispute>(res)
-    // }
+    /// https://stripe.com/docs/api#retrieve_dispute
+    pub fn retrieve_dispute(&self, dispute_id: &str) -> Result<Dispute> {
+        let url = StripeClient::endpoint(&format!("/disputes/{}", dispute_id));
+        let res = self.client.get(&url)
+            .headers(self.default_headers())
+            .send()?;
+        StripeClient::parse_response::<Dispute>(res)
+    }
 
-    // /// https://stripe.com/docs/api#update_dispute
-    // pub fn update_dispute(
-    //     &self,
-    //     dispute_id: &str,
-    //     evidence: &BTreeMap<String, String>,
-    //     metadata: Option<&BTreeMap<String, String>>,
-    // ) -> Result<Dispute> {
-    //     let url = StripeClient::endpoint(&format!("/disputes/{}", dispute_id));
-    //     let mut body = evidence
-    //         .into_iter()
-    //         .map(|(k, v)| (format!("evidence[{}]", k), v.clone()))
-    //         .collect::<BTreeMap<_, _>>()
-    //         .encoded_string();
+    /// https://stripe.com/docs/api#update_dispute
+    pub fn update_dispute(
+        &self,
+        dispute_id: &str,
+        evidence: &BTreeMap<String, String>,
+        metadata: Option<&BTreeMap<String, String>>,
+    ) -> Result<Dispute> {
+        let url = StripeClient::endpoint(&format!("/disputes/{}", dispute_id));
+        let mut body = evidence
+            .into_iter()
+            .map(|(k, v)| (format!("evidence[{}]", k), v.clone()))
+            .collect::<BTreeMap<_, _>>()
+            .encoded_string();
 
-    //     if let Some(metadata) = metadata {
-    //         let metadata = metadata
-    //             .into_iter()
-    //             .map(|(k, v)| (format!("metadata[{}]", k), v.clone()))
-    //             .collect::<BTreeMap<_, _>>()
-    //             .encoded_string();
-    //         body.push('&');
-    //         body.push_str(&metadata);
-    //     }
+        if let Some(metadata) = metadata {
+            let metadata = metadata
+                .into_iter()
+                .map(|(k, v)| (format!("metadata[{}]", k), v.clone()))
+                .collect::<BTreeMap<_, _>>()
+                .encoded_string();
+            body.push('&');
+            body.push_str(&metadata);
+        }
 
-    //     let res = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes())
-    //         .send()?;
-    //     StripeClient::parse_response::<Dispute>(res)
-    // }
+        let res = self.client.post(&url)
+            .headers(self.default_headers())
+            .body(body.as_bytes())
+            .send()?;
+        StripeClient::parse_response::<Dispute>(res)
+    }
 
     /// https://stripe.com/docs/api#close_dispute
     pub fn close_dispute(&self, dispute_id: &str) -> Result<Dispute> {

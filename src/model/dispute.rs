@@ -1,4 +1,3 @@
-use custom_ser::*;
 use serde;
 use std::collections::BTreeMap;
 use super::balance_transaction::BalanceTransaction;
@@ -82,9 +81,11 @@ pub enum DisputeReason {
     Other(String),
 }
 
-impl DisputeReason {
-    fn from_str(s: &str) -> DisputeReason {
-        match s {
+impl serde::Deserialize for DisputeReason {
+    fn deserialize<D>(deserializer: &mut D) -> Result<DisputeReason, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "duplicate"                 => DisputeReason::Duplicate,
             "fraudulent"                => DisputeReason::Fraudulent,
             "subscription_canceled"     => DisputeReason::SubscriptionCanceled,
@@ -97,30 +98,10 @@ impl DisputeReason {
             "bank_cannot_process"       => DisputeReason::BankCannotProcess,
             "debit_not_authorized"      => DisputeReason::DebitNotAuthorized,
             "general"                   => DisputeReason::General,
-            other                       => DisputeReason::Other(String::from(other))
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            DisputeReason::Duplicate               => "duplicate",
-            DisputeReason::Fraudulent              => "fraudulent",
-            DisputeReason::SubscriptionCanceled    => "subscription_canceled",
-            DisputeReason::ProductUnacceptable     => "product_unacceptable",
-            DisputeReason::ProductNotReceived      => "product_not_received",
-            DisputeReason::Unrecognized            => "unrecognized",
-            DisputeReason::CreditNotProcessed      => "credit_not_processed",
-            DisputeReason::IncorrectAccountDetails => "incorrect_account_details",
-            DisputeReason::InsufficientFunds       => "insufficient_funds",
-            DisputeReason::BankCannotProcess       => "bank_cannot_process",
-            DisputeReason::DebitNotAuthorized      => "debit_not_authorized",
-            DisputeReason::General                 => "general",
-            DisputeReason::Other(ref s)            => s
+            other                       => DisputeReason::Other(String::from(other)),
         })
     }
 }
-
-simple_serde!(DisputeReason, DisputeReason::to_string, DisputeReason::from_str);
 
 #[derive(Clone, Debug)]
 pub enum DisputeStatus {
@@ -136,9 +117,11 @@ pub enum DisputeStatus {
     Other(String),
 }
 
-impl DisputeStatus {
-    fn from_str(s: &str) -> DisputeStatus {
-        match s {
+impl serde::Deserialize for DisputeStatus {
+    fn deserialize<D>(deserializer: &mut D) -> Result<DisputeStatus, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
             "warning_needs_response" => DisputeStatus::WarningNeedsResponse,
             "warning_under_review"   => DisputeStatus::WarningUnderReview,
             "warning_closed"         => DisputeStatus::WarningClosed,
@@ -149,23 +132,6 @@ impl DisputeStatus {
             "won"                    => DisputeStatus::Won,
             "lost"                   => DisputeStatus::Lost,
             other                    => DisputeStatus::Other(String::from(other)),
-        }
-    }
-
-    fn to_string(&self) -> String {
-        String::from(match *self {
-            DisputeStatus::WarningNeedsResponse => "warning_needs_response",
-            DisputeStatus::WarningUnderReview   => "warning_under_review",
-            DisputeStatus::WarningClosed        => "warning_closed",
-            DisputeStatus::NeedsResponse        => "needs_response",
-            DisputeStatus::ResponseDisabled     => "response_disabled",
-            DisputeStatus::UnderReview          => "under_review",
-            DisputeStatus::ChargeRefunded       => "charge_refunded",
-            DisputeStatus::Won                  => "won",
-            DisputeStatus::Lost                 => "lost",
-            DisputeStatus::Other(ref s)         => s,
         })
     }
 }
-
-simple_serde!(DisputeStatus, DisputeStatus::to_string, DisputeStatus::from_str);
