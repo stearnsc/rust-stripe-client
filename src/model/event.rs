@@ -19,6 +19,12 @@ pub struct Event {
     pub event_type: String,
 }
 
+impl StripeObject for Event {
+    fn id(&self) -> &str {
+        &self.id
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct EventDataRaw {
     pub object: Value,

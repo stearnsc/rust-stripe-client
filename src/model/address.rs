@@ -5,5 +5,5 @@ pub struct Address {
     pub city: String,
     pub country: String,
     pub postal_code: String,
-    pub state: String
+    pub state: Option<String>
 }
