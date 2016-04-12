@@ -21,10 +21,13 @@ pub mod model;
 mod idempotency_header;
 mod stripe_version_header;
 mod structured_encoding;
+mod time_constraint;
+
+pub use time_constraint::TimeConstraint;
 
 use errors::error::Error;
 use errors::stripe_error;
-pub use model::*;
+use model::*;
 use idempotency_header::IdempotencyKey;
 use stripe_version_header::StripeVersion;
 use structured_encoding::StructuredEncoding;
@@ -93,9 +96,9 @@ impl StripeClient {
     /// https://stripe.com/docs/api#list_accounts
     pub fn list_connected_accounts(
         &self,
-        params: &BTreeMap<String, String>
+        params: Option<&BTreeMap<String, String>>
     ) -> Result<ApiList<Account>> {
-        self.get("/accounts", Some(params))
+        self.get("/accounts", params)
     }
 
     /// https://stripe.com/docs/api#retrieve_balance
@@ -166,8 +169,20 @@ impl StripeClient {
     }
 
     /// https://stripe.com/docs/api#list_charges
-    pub fn list_charges(&self, params: &BTreeMap<String, String>) -> Result<ApiList<Charge>> {
-        self.get("/charges", Some(params))
+    pub fn list_charges(
+        &self,
+        params: Option<&BTreeMap<String, String>>,
+        created_constraint: Option<&TimeConstraint>,
+        source_type: Option<SourceType>,
+    ) -> Result<ApiList<Charge>> {
+        let mut params = params.map(|p| p.clone()).unwrap_or(BTreeMap::new());
+        if let Some(created_constraint) = created_constraint {
+            params.extend(structured("created", &created_constraint.to_map()));
+        }
+        if let Some(source_type) = source_type {
+            params.insert(format!("source[object]"), serde_json::to_string(&source_type)?);
+        }
+        self.get("/charges", if params.is_empty() { None } else { Some(&params) })
     }
 
     /// https://stripe.com/docs/api#create_customer
@@ -202,9 +217,12 @@ impl StripeClient {
     /// https://stripe.com/docs/api#list_customers
     pub fn list_customers(
         &self,
-        params: &BTreeMap<String, String>
+        params: Option<&BTreeMap<String, String>>,
+        created_constraint: Option<&TimeConstraint>,
     ) -> Result<ApiList<Customer>> {
-        self.get("/customers", Some(params))
+        let params = params.map(|p| p.clone());
+        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        self.get("/customers", or_join(params, created_constraint).as_ref())
     }
 
     /// https://stripe.com/docs/api#retrieve_dispute
@@ -234,8 +252,14 @@ impl StripeClient {
     }
 
     /// https://stripe.com/docs/api#list_disputes
-    pub fn list_disputes(&self, args: &BTreeMap<String, String>) -> Result<ApiList<Dispute>> {
-        self.get("/disputes", Some(args))
+    pub fn list_disputes(
+        &self,
+        args: Option<&BTreeMap<String, String>>,
+        created_constraint: Option<&TimeConstraint>,
+    ) -> Result<ApiList<Dispute>> {
+        let args = args.map(|a| a.clone());
+        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        self.get("/disputes", or_join(args, created_constraint).as_ref())
     }
 
     /// https://stripe.com/docs/api#retrieve_event
@@ -244,8 +268,14 @@ impl StripeClient {
     }
 
     /// https://stripe.com/docs/api#list_events
-    pub fn list_events(&self, args: &BTreeMap<String, String>) -> Result<ApiList<Event>> {
-        self.get("/events", Some(args))
+    pub fn list_events(
+        &self,
+        args: Option<&BTreeMap<String, String>>,
+        created_constraint: Option<&TimeConstraint>,
+    ) -> Result<ApiList<Event>> {
+        let args = args.map(|a| a.clone());
+        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        self.get("/events", or_join(args, created_constraint).as_ref())
     }
 
     /// https://stripe.com/docs/api#create_refund
@@ -287,8 +317,8 @@ impl StripeClient {
     }
 
     /// https://stripe.com/docs/api#list_refunds
-    pub fn list_refunds(&self, args: &BTreeMap<String, String>) -> Result<ApiList<Refund>> {
-        self.get("/refunds", Some(args))
+    pub fn list_refunds(&self, args: Option<&BTreeMap<String, String>>) -> Result<ApiList<Refund>> {
+        self.get("/refunds", args)
     }
 
     /// https://stripe.com/docs/api#create_card_token
@@ -370,9 +400,15 @@ impl StripeClient {
     /// https://stripe.com/docs/api#list_transfers
     pub fn list_transfers(
         &self,
-        options: Option<&BTreeMap<String, String>>
+        created_constraint: Option<&TimeConstraint>,
+        date_constraint: Option<&TimeConstraint>,
+        args: Option<&BTreeMap<String, String>>
     ) -> Result<ApiList<Transfer>> {
-        self.get("/transfers", options)
+        let args = args.map(|a| a.clone());
+        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        let date_constraint = date_constraint.map(|c| structured("date", &c.to_map()));
+        let args = or_join(args, or_join(created_constraint, date_constraint));
+        self.get("/transfers", args.as_ref())
     }
 
     pub fn get<T: Deserialize>(
@@ -495,6 +531,20 @@ fn structured(name: &str, map: &BTreeMap<String, String>) -> BTreeMap<String, St
     map.into_iter()
         .map(|(k, v)| (format!("{}[{}]", name, k), v.clone()))
         .collect::<BTreeMap<_, _>>()
+}
+
+fn or_join<C, A>(a: Option<C>, b: Option<C>) -> Option<C>
+    where C: Extend<A> + IntoIterator<Item=A>
+{
+    match (a, b) {
+        (Some(mut a), Some(b)) => {
+            a.extend(b);
+            Some(a)
+        },
+        (a@Some(_), None)  => a,
+        (None, b@Some(_))  => b,
+        (None, None)       => None
+    }
 }
 
 #[cfg(test)]

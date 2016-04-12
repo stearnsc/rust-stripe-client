@@ -22,3 +22,17 @@ impl serde::Deserialize for SourceType {
         })
     }
 }
+
+impl serde::Serialize for SourceType {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+        where S: serde::Serializer
+    {
+        match *self {
+            SourceType::Card            => str::serialize("card", serializer),
+            SourceType::BankAccount     => str::serialize("bank_account", serializer),
+            SourceType::BitcoinReceiver => str::serialize("bitcoin_receiver", serializer),
+            SourceType::AlipayAccount   => str::serialize("alipay_account", serializer),
+            SourceType::Other(ref s)    => str::serialize(s, serializer),
+        }
+    }
+}
