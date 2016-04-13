@@ -15,7 +15,7 @@ impl Into<BTreeMap<String, String>> for Shipping {
     fn into(self) -> BTreeMap<String, String> {
         let mut map = BTreeMap::new();
         match self { Shipping { address, carrier, name, phone, tracking_number } => {
-            map.extend(structured("address", &address.into()));
+            map.extend(structured("address", address.into()));
             if let Some(carrier) = carrier {
                 map.insert("carrier".to_string(), carrier);
             }

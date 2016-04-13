@@ -27,6 +27,12 @@ pub struct BitcoinReceiver {
     pub used_for_payment: bool,
 }
 
+impl StripeObject for BitcoinReceiver {
+    fn id(&self) -> &str {
+        &self.id
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct BitcoinTransaction {
     pub id: String,
