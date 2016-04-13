@@ -35,22 +35,23 @@ impl From<stripe_error::StripeError> for Error {
     }
 }
 
+use errors::error::Error::*;
 impl std::error::Error for Error {
     fn description(&self) -> &str {
         match *self {
-            Error::HttpError(ref err) => err.description(),
-            Error::SerializationError(ref err) => err.description(),
-            Error::IoError(ref err) => err.description(),
-            Error::StripeError(ref err) => err.description()
+            HttpError(ref err)          => err.description(),
+            SerializationError(ref err) => err.description(),
+            IoError(ref err)            => err.description(),
+            StripeError(ref err)        => err.description()
         }
     }
 
     fn cause(&self) -> Option<&std::error::Error> {
         match *self {
-            Error::HttpError(ref err) => Some(err),
-            Error::SerializationError(ref err) => Some(err),
-            Error::IoError(ref err) => Some(err),
-            Error::StripeError(ref err) => Some(err)
+            HttpError(ref err)          => Some(err),
+            SerializationError(ref err) => Some(err),
+            IoError(ref err)            => Some(err),
+            StripeError(ref err)        => Some(err)
         }
     }
 }
@@ -58,10 +59,10 @@ impl std::error::Error for Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
-            Error::HttpError(ref err)  => write!(f, "Error::HyperError({})", err),
-            Error::SerializationError(ref err)  => write!(f, "Error::SerdeError({})", err),
-            Error::IoError(ref err)     => write!(f, "Error::IoError({})", err),
-            Error::StripeError(ref err) => write!(f, "Error::StripeError({})", err)
+            HttpError(ref err)          => write!(f, "Error::HyperError({})", err),
+            SerializationError(ref err) => write!(f, "Error::SerdeError({})", err),
+            IoError(ref err)            => write!(f, "Error::IoError({})", err),
+            StripeError(ref err)        => write!(f, "Error::StripeError({})", err)
         }
     }
 }

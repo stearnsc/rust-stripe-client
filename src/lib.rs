@@ -23,6 +23,7 @@ mod idempotency_header;
 mod stripe_version_header;
 mod structured_encoding;
 mod time_constraint;
+mod util;
 
 pub use either::Either;
 pub use time_constraint::TimeConstraint;
@@ -34,6 +35,7 @@ use model::*;
 use idempotency_header::IdempotencyKey;
 use stripe_version_header::StripeVersion;
 use structured_encoding::StructuredEncoding;
+use util::*;
 
 const BASE_URL: &'static str = "https://api.stripe.com/v1";
 const API_VERSION: &'static str = "2016-03-07";
@@ -128,7 +130,7 @@ impl StripeClient {
     ) -> Result<ApiList<Charge>> {
         let mut args = args.map(|p| p.clone()).unwrap_or(BTreeMap::new());
         if let Some(created_constraint) = created_constraint {
-            args.extend(structured("created", &created_constraint.to_map()));
+            args.extend(structured("created", &created_constraint.into()));
         }
         if let Some(source_type) = source_type {
             args.insert(format!("source[object]"), serde_json::to_string(&source_type)?);
@@ -139,9 +141,24 @@ impl StripeClient {
     /// https://stripe.com/docs/api#create_customer
     pub fn create_customer(
         &self,
-        args: Option<&BTreeMap<String, String>>
+        args: Option<&BTreeMap<String, String>>,
+        metadata: Option<&BTreeMap<String, String>>,
+        shipping: Option<&Shipping>,
+        card_token_or_args: Option<Either<String, &BTreeMap<String, String>>>
     ) -> Result<Customer> {
-        self.post("/customers", args)
+        let args = args.map(|a| a.clone());
+        let metadata = metadata.map(|m| structured("metadata", m));
+        let shipping = shipping.map(|s| structured("shipping", &s.into()));
+        let card = card_token_or_args.map(|c| match c {
+            Left(token) => {
+                let mut map = BTreeMap::new();
+                map.insert("source".to_string(), token);
+                map
+            },
+            Right(card) => structured("source", card),
+        });
+        let args = or_join(args, or_join(metadata, or_join(shipping, card)));
+        self.post("/customers", args.as_ref())
     }
 
     /// https://stripe.com/docs/api#retrieve_customer
@@ -153,9 +170,23 @@ impl StripeClient {
     pub fn update_customer(
         &self,
         customer_id: &str,
-        args: &BTreeMap<String, String>
+        args: Option<&BTreeMap<String, String>>,
+        metadata: Option<&BTreeMap<String, String>>,
+        shipping: Option<&Shipping>,
+        card_token_or_args: Option<Either<String, &BTreeMap<String, String>>>
     ) -> Result<Customer> {
-        self.post(&format!("/customers/{}", customer_id), Some(args))
+        let mut args = args.map(|a| a.clone()).unwrap_or(BTreeMap::new());
+        if let Some(metadata) = metadata {
+            args.extend(structured("metadata", metadata));
+        }
+        if let Some(shipping) = shipping {
+            args.extend(structured("shipping", &shipping.into()));
+        }
+        if let Some(card) = card_token_or_args { match card {
+            Left(token) => { args.insert("source".to_string(), token); }
+            Right(card) => { args.extend(structured("source", card)); }
+        }}
+        self.post(&format!("/customers/{}", customer_id), Some(&args))
     }
 
     /// https://stripe.com/docs/api#delete_customer
@@ -170,7 +201,7 @@ impl StripeClient {
         created_constraint: Option<&TimeConstraint>,
     ) -> Result<ApiList<Customer>> {
         let args = args.map(|p| p.clone());
-        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        let created_constraint = created_constraint.map(|c| structured("created", &c.into()));
         self.get("/customers", or_join(args, created_constraint).as_ref())
     }
 
@@ -205,7 +236,7 @@ impl StripeClient {
         created_constraint: Option<&TimeConstraint>,
     ) -> Result<ApiList<Dispute>> {
         let args = args.map(|a| a.clone());
-        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        let created_constraint = created_constraint.map(|c| structured("created", &c.into()));
         self.get("/disputes", or_join(args, created_constraint).as_ref())
     }
 
@@ -221,7 +252,7 @@ impl StripeClient {
         created_constraint: Option<&TimeConstraint>,
     ) -> Result<ApiList<Event>> {
         let args = args.map(|a| a.clone());
-        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        let created_constraint = created_constraint.map(|c| structured("created", &c.into()));
         self.get("/events", or_join(args, created_constraint).as_ref())
     }
 
@@ -347,8 +378,8 @@ impl StripeClient {
         args: Option<&BTreeMap<String, String>>
     ) -> Result<ApiList<Transfer>> {
         let args = args.map(|a| a.clone());
-        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
-        let date_constraint = date_constraint.map(|c| structured("date", &c.to_map()));
+        let created_constraint = created_constraint.map(|c| structured("created", &c.into()));
+        let date_constraint = date_constraint.map(|c| structured("date", &c.into()));
         let args = or_join(args, or_join(created_constraint, date_constraint));
         self.get("/transfers", args.as_ref())
     }
@@ -506,7 +537,7 @@ impl StripeClient {
         created_constraint: Option<&TimeConstraint>,
         args: Option<&BTreeMap<String, String>>
     ) -> Result<ApiList<ApplicationFee>> {
-        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        let created_constraint = created_constraint.map(|c| structured("created", &c.into()));
         let args = args.map(|a| a.clone());
         self.get("/application_fees", or_join(created_constraint, args).as_ref())
     }
@@ -574,7 +605,7 @@ impl StripeClient {
         created_constraint: Option<&TimeConstraint>,
         args: Option<&BTreeMap<String, String>>,
     ) -> Result<ApiList<Recipient>> {
-        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        let created_constraint = created_constraint.map(|c| structured("created", &c.into()));
         let args = args.map(|a| a.clone());
         self.get("/recipients", or_join(created_constraint, args).as_ref())
     }
@@ -597,15 +628,13 @@ impl StripeClient {
         &self,
         account_id: &str,
         bank_account_token_or_args: Either<String, &BTreeMap<String, String>>,
-        customer: bool,
         default_for_currency: bool,
         metadata: Option<&BTreeMap<String, String>>,
     ) -> Result<BankAccount> {
         let mut args = BTreeMap::new();
-        let key = if customer { "source".to_string() } else { "external_account".to_string() };
         match bank_account_token_or_args {
-            Left(token) => { args.insert(key, token); },
-            Right(account) => { args.extend(structured(&key, account)); },
+            Left(token) => { args.insert("external_account".to_string(), token); },
+            Right(account) => { args.extend(structured("external_account", account)); },
         }
         args.insert("default_for_currency".to_string(), default_for_currency.to_string());
         if let Some(metadata) = metadata {
@@ -613,6 +642,54 @@ impl StripeClient {
         }
         self.post(&format!("/accounts/{}/external_accounts", account_id), Some(&args))
     }
+
+    /// https://stripe.com/docs/api#account_retrieve_bank_account
+    pub fn account_retrieve_bank_account(
+        &self,
+        account_id: &str,
+        bank_account_id: &str
+    ) -> Result<BankAccount> {
+        self.get(&format!("/accounts/{}/external_accounts/{}", account_id, bank_account_id), None)
+    }
+
+    /// https://stripe.com/docs/api#account_update_bank_account
+    pub fn account_update_bank_account(
+        &self,
+        account_id: &str,
+        bank_account_id: &str,
+        args: &BTreeMap<String, String>,
+        metadata: Option<&BTreeMap<String, String>>
+    ) -> Result<BankAccount> {
+        let mut args = args.clone();
+        if let Some(metadata) = metadata {
+            args.extend(structured("metadata", metadata));
+        }
+        self.post(
+            &format!("/accounts/{}/external_accounts/{}", account_id, bank_account_id),
+            Some(&args)
+        )
+    }
+
+    /// https://stripe.com/docs/api#account_delete_bank_account
+    pub fn account_delete_bank_account(
+        &self,
+        account_id: &str,
+        bank_account_id: &str
+    ) -> Result<Delete> {
+        self.delete(&format!("/accounts/{}/external_accounts/{}", account_id, bank_account_id))
+    }
+
+    /// https://stripe.com/docs/api#account_list_bank_accounts
+    pub fn account_list_bank_accounts(
+        &self,
+        account_id: &str,
+        args: Option<&BTreeMap<String, String>>
+    ) -> Result<ApiList<BankAccount>> {
+        self.get(&format!("/accounts/{}/external_accounts", account_id), args)
+    }
+
+    /// https://stripe.com/docs/api#account_create_card
+    // pub fn account_create_card(&self, )
 
     pub fn get<T: Deserialize>(
         &self,
@@ -729,26 +806,6 @@ impl StripeClient {
         }));
         headers.set(StripeVersion::new(API_VERSION));
         headers
-    }
-}
-
-fn structured(name: &str, map: &BTreeMap<String, String>) -> BTreeMap<String, String> {
-    map.into_iter()
-        .map(|(k, v)| (format!("{}[{}]", name, k), v.clone()))
-        .collect::<BTreeMap<_, _>>()
-}
-
-fn or_join<C, A>(a: Option<C>, b: Option<C>) -> Option<C>
-    where C: Extend<A> + IntoIterator<Item=A>
-{
-    match (a, b) {
-        (Some(mut a), Some(b)) => {
-            a.extend(b);
-            Some(a)
-        },
-        (a@Some(_), None)  => a,
-        (None, b@Some(_))  => b,
-        (None, None)       => None
     }
 }
 

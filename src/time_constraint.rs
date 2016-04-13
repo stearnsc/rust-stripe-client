@@ -55,3 +55,28 @@ impl TimeConstraint {
         map
     }
 }
+
+impl Into<BTreeMap<String, String>> for TimeConstraint {
+    fn into(self) -> BTreeMap<String, String> {
+        (&self).into()
+    }
+}
+
+impl<'a> Into<BTreeMap<String, String>> for &'a TimeConstraint {
+    fn into(self) -> BTreeMap<String, String> {
+        let mut map = BTreeMap::new();
+        if let Some(gt) = self.gt {
+            map.insert("gt".to_string(), gt.to_string());
+        }
+        if let Some(gte) = self.gte {
+            map.insert("gte".to_string(), gte.to_string());
+        }
+        if let Some(lt) = self.lt {
+            map.insert("lt".to_string(), lt.to_string());
+        }
+        if let Some(lte) = self.lte {
+            map.insert("lte".to_string(), lte.to_string());
+        }
+        map
+    }
+}
