@@ -15,6 +15,7 @@ use serde::de::Deserialize;
 use std::collections::BTreeMap;
 use std::io::Read;
 
+pub mod either;
 pub mod errors;
 pub mod model;
 
@@ -23,8 +24,10 @@ mod stripe_version_header;
 mod structured_encoding;
 mod time_constraint;
 
+pub use either::Either;
 pub use time_constraint::TimeConstraint;
 
+use either::Either::{Left, Right};
 use errors::error::Error;
 use errors::stripe_error;
 use model::*;
@@ -51,56 +54,6 @@ impl StripeClient {
         }
     }
 
-    /// https://stripe.com/docs/api#retrieve_account
-    /// Fetch account associated with self.key
-    pub fn retrieve_current_account(&self) -> Result<Account> {
-        self.get("/account", None)
-    }
-
-    /// https://stripe.com/docs/api#retrieve_account
-    pub fn retrieve_account(&self, account_id: &str) -> Result<Account> {
-        self.get(&format!("/accounts/{}", account_id), None)
-    }
-
-    /// https://stripe.com/docs/api#create_account
-    pub fn create_account(&self, params: &BTreeMap<String, String>) -> Result<Account> {
-        let body = params.encoded_string();
-        self.post("/accounts", Some(body.as_bytes()))
-    }
-
-    /// https://stripe.com/docs/api#update_account
-    pub fn update_account(
-        &self,
-        account_id: &str,
-        update_params: &BTreeMap<String, String>
-    ) -> Result<Account> {
-        let body = update_params.encoded_string();
-        self.post(&format!("/accounts/{}", account_id), Some(body.as_bytes()))
-    }
-
-    /// https://stripe.com/docs/api#delete_account
-    pub fn delete_account(&self, account_id: &str) -> Result<Delete> {
-        self.delete(&format!("/accounts/{}", account_id))
-    }
-
-    /// https://stripe.com/docs/api#reject_account
-    pub fn reject_account(
-        &self,
-        account_id: &str,
-        reason: &AccountRejectReason
-    ) -> Result<Account> {
-        let body = serde_json::to_string(reason)?;
-        self.post(&format!("/accounts/{}/reject", account_id), Some(body.as_bytes()))
-    }
-
-    /// https://stripe.com/docs/api#list_accounts
-    pub fn list_connected_accounts(
-        &self,
-        params: Option<&BTreeMap<String, String>>
-    ) -> Result<ApiList<Account>> {
-        self.get("/accounts", params)
-    }
-
     /// https://stripe.com/docs/api#retrieve_balance
     pub fn retrieve_balance(&self) -> Result<Balance> {
         self.get("/balance", None)
@@ -117,19 +70,19 @@ impl StripeClient {
     /// https://stripe.com/docs/api#balance_history
     pub fn list_balance_history(
         &self,
-        params: &BTreeMap<String, String>
+        args: &BTreeMap<String, String>
     ) -> Result<ApiList<BalanceTransaction>> {
-        self.get("/balance/history", Some(params))
+        self.get("/balance/history", Some(args))
     }
 
     /// https://stripe.com/docs/api#create_charge
     pub fn create_charge(
         &self,
-        params: &BTreeMap<String, String>,
+        args: &BTreeMap<String, String>,
         idempotency_key: Option<&str>
     ) -> Result<Charge> {
         let url = StripeClient::endpoint("/charges");
-        let body = params.encoded_string();
+        let body = args.encoded_string();
         let mut req_builder = self.client.post(&url)
             .headers(self.default_headers())
             .body(body.as_bytes());
@@ -152,46 +105,43 @@ impl StripeClient {
     pub fn update_charge(
         &self,
         charge_id: &str,
-        update: &BTreeMap<String, String>
+        args: &BTreeMap<String, String>
     ) -> Result<Charge> {
-        let body = update.encoded_string();
-        self.post(&format!("/charges/{}", charge_id), Some(body.as_bytes()))
+        self.post(&format!("/charges/{}", charge_id), Some(args))
     }
 
     /// https://stripe.com/docs/api#capture_charge
     pub fn capture_charge(
         &self,
         charge_id: &str,
-        params: &BTreeMap<String, String>
+        args: &BTreeMap<String, String>
     ) -> Result<Charge> {
-        let body = params.encoded_string();
-        self.post(&format!("/charges/{}", charge_id), Some(body.as_bytes()))
+        self.post(&format!("/charges/{}", charge_id), Some(args))
     }
 
     /// https://stripe.com/docs/api#list_charges
     pub fn list_charges(
         &self,
-        params: Option<&BTreeMap<String, String>>,
+        args: Option<&BTreeMap<String, String>>,
         created_constraint: Option<&TimeConstraint>,
         source_type: Option<SourceType>,
     ) -> Result<ApiList<Charge>> {
-        let mut params = params.map(|p| p.clone()).unwrap_or(BTreeMap::new());
+        let mut args = args.map(|p| p.clone()).unwrap_or(BTreeMap::new());
         if let Some(created_constraint) = created_constraint {
-            params.extend(structured("created", &created_constraint.to_map()));
+            args.extend(structured("created", &created_constraint.to_map()));
         }
         if let Some(source_type) = source_type {
-            params.insert(format!("source[object]"), serde_json::to_string(&source_type)?);
+            args.insert(format!("source[object]"), serde_json::to_string(&source_type)?);
         }
-        self.get("/charges", if params.is_empty() { None } else { Some(&params) })
+        self.get("/charges", if args.is_empty() { None } else { Some(&args) })
     }
 
     /// https://stripe.com/docs/api#create_customer
     pub fn create_customer(
         &self,
-        params: Option<&BTreeMap<String, String>>
+        args: Option<&BTreeMap<String, String>>
     ) -> Result<Customer> {
-        let body = params.map(|p| p.encoded_string());
-        self.post("/customers", body.as_ref().map(|b| b.as_bytes()))
+        self.post("/customers", args)
     }
 
     /// https://stripe.com/docs/api#retrieve_customer
@@ -203,10 +153,9 @@ impl StripeClient {
     pub fn update_customer(
         &self,
         customer_id: &str,
-        params: &BTreeMap<String, String>
+        args: &BTreeMap<String, String>
     ) -> Result<Customer> {
-        let body = params.encoded_string();
-        self.post(&format!("/customers/{}", customer_id), Some(body.as_bytes()))
+        self.post(&format!("/customers/{}", customer_id), Some(args))
     }
 
     /// https://stripe.com/docs/api#delete_customer
@@ -217,12 +166,12 @@ impl StripeClient {
     /// https://stripe.com/docs/api#list_customers
     pub fn list_customers(
         &self,
-        params: Option<&BTreeMap<String, String>>,
+        args: Option<&BTreeMap<String, String>>,
         created_constraint: Option<&TimeConstraint>,
     ) -> Result<ApiList<Customer>> {
-        let params = params.map(|p| p.clone());
+        let args = args.map(|p| p.clone());
         let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
-        self.get("/customers", or_join(params, created_constraint).as_ref())
+        self.get("/customers", or_join(args, created_constraint).as_ref())
     }
 
     /// https://stripe.com/docs/api#retrieve_dispute
@@ -237,13 +186,11 @@ impl StripeClient {
         evidence: &BTreeMap<String, String>,
         metadata: Option<&BTreeMap<String, String>>,
     ) -> Result<Dispute> {
-        let mut body = structured("evidence", evidence);
+        let mut args = structured("evidence", evidence);
         if let Some(metadata) = metadata {
-            body.extend(structured("metadata", metadata));
+            args.extend(structured("metadata", metadata));
         }
-
-        let body = body.encoded_string();
-        self.post(&format!("/disputes/{}", dispute_id), Some(body.as_bytes()))
+        self.post(&format!("/disputes/{}", dispute_id), Some(&args))
     }
 
     /// https://stripe.com/docs/api#close_dispute
@@ -290,9 +237,7 @@ impl StripeClient {
         if let Some(metadata) = metadata {
             args.extend(structured("metadata", metadata));
         }
-
-        let body = args.encoded_string();
-        self.post("/refunds", Some(body.as_bytes()))
+        self.post("/refunds", Some(&args))
     }
 
     /// https://stripe.com/docs/api#retrieve_refund
@@ -311,9 +256,7 @@ impl StripeClient {
         if let Some(metadata) = metadata {
             args.extend(structured("metadata", metadata));
         }
-
-        let body = args.encoded_string();
-        self.post(&format!("/refunds/{}", refund_id), Some(body.as_bytes()))
+        self.post(&format!("/refunds/{}", refund_id), Some(&args))
     }
 
     /// https://stripe.com/docs/api#list_refunds
@@ -332,9 +275,7 @@ impl StripeClient {
         if let Some(customer_id) = customer_id {
             args.insert("customer".to_string(), customer_id);
         }
-
-        let body = args.encoded_string();
-        self.post("/tokens", Some(body.as_bytes()))
+        self.post("/tokens", Some(&args))
     }
 
     /// https://stripe.com/docs/api#create_bank_account_token
@@ -349,14 +290,17 @@ impl StripeClient {
             args.insert("customer".to_string(), customer_id);
         }
 
-        let body = args.encoded_string();
-        self.post("/tokens", Some(body.as_bytes()))
+        self.post("/tokens", Some(&args))
     }
 
     /// https://stripe.com/docs/api#create_pii_token
     pub fn create_pii_token(&self, pii: Option<String>) -> Result<Token> {
-        let body = pii.map(|pii| format!("pii[personal_id_number]={}", pii));
-        self.post("/tokens", body.as_ref().map(|s| s.as_bytes()))
+        let args = pii.map(|pii| {
+            let mut args = BTreeMap::new();
+            args.insert("pii[personal_id_number]".to_string(), pii);
+            args
+        });
+        self.post("/tokens", args.as_ref())
     }
 
     /// https://stripe.com/docs/api#retrieve_token
@@ -369,8 +313,7 @@ impl StripeClient {
         &self,
         transfer_args: &BTreeMap<String, String>
     ) -> Result<Transfer> {
-        let body = transfer_args.encoded_string();
-        self.post("/transfers", Some(body.as_bytes()))
+        self.post("/transfers", Some(transfer_args))
     }
 
     /// https://stripe.com/docs/api#retrieve_transfer
@@ -393,8 +336,7 @@ impl StripeClient {
             args.extend(structured("metadata", metadata));
         }
 
-        let body = args.encoded_string();
-        self.post(&format!("/transfers/{}", transfer_id), Some(body.as_bytes()))
+        self.post(&format!("/transfers/{}", transfer_id), Some(&args))
     }
 
     /// https://stripe.com/docs/api#list_transfers
@@ -411,13 +353,274 @@ impl StripeClient {
         self.get("/transfers", args.as_ref())
     }
 
+    /// https://stripe.com/docs/api#create_transfer_reversal
+    pub fn create_transfer_reversal(
+        &self,
+        transfer_id: &str,
+        args: Option<&BTreeMap<String, String>>,
+        metadata: Option<&BTreeMap<String, String>>,
+    ) -> Result<TransferReversal> {
+        let args = args.map(|a| a.clone());
+        let metadata = metadata.map(|m| structured("metadata", m));
+        self.post(
+            &format!("/transfers/{}/reversals", transfer_id),
+            or_join(args, metadata).as_ref()
+        )
+    }
+
+    /// https://stripe.com/docs/api#retrieve_transfer_reversal
+    pub fn retrieve_transfer_reversal(
+        &self,
+        transfer_id: &str,
+        reversal_id: &str,
+    ) -> Result<TransferReversal> {
+        self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), None)
+    }
+
+    /// https://stripe.com/docs/api#update_transfer_reversal
+    pub fn update_transfer_reversal(
+        &self,
+        transfer_id: &str,
+        reversal_id: &str,
+        description: Option<String>,
+        metadata: Option<&BTreeMap<String, String>>,
+    ) -> Result<TransferReversal> {
+        let description = description.map(|d| {
+            let mut map = BTreeMap::new();
+            map.insert("description".to_string(), d);
+            map
+        });
+        let metadata = metadata.map(|m| structured("metadata", m));
+        let body = or_join(description, metadata);
+        self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), body.as_ref())
+    }
+
+    /// https://stripe.com/docs/api#list_transfer_reversals
+    pub fn list_transfer_reversals(
+        &self,
+        transfer_id: &str,
+        args: Option<&BTreeMap<String, String>>,
+    ) -> Result<ApiList<TransferReversal>> {
+        self.get(&format!("/transfers/{}/reversals", transfer_id), args)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_account
+    /// Fetch account associated with self.key
+    pub fn retrieve_current_account(&self) -> Result<Account> {
+        self.get("/account", None)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_account
+    pub fn retrieve_account(&self, account_id: &str) -> Result<Account> {
+        self.get(&format!("/accounts/{}", account_id), None)
+    }
+
+    /// https://stripe.com/docs/api#create_account
+    pub fn create_account(&self, args: &BTreeMap<String, String>) -> Result<Account> {
+        self.post("/accounts", Some(args))
+    }
+
+    /// https://stripe.com/docs/api#update_account
+    pub fn update_account(
+        &self,
+        account_id: &str,
+        args: &BTreeMap<String, String>
+    ) -> Result<Account> {
+        self.post(&format!("/accounts/{}", account_id), Some(args))
+    }
+
+    /// https://stripe.com/docs/api#delete_account
+    pub fn delete_account(&self, account_id: &str) -> Result<Delete> {
+        self.delete(&format!("/accounts/{}", account_id))
+    }
+
+    /// https://stripe.com/docs/api#reject_account
+    pub fn reject_account(
+        &self,
+        account_id: &str,
+        reason: &AccountRejectReason
+    ) -> Result<Account> {
+        let mut args = BTreeMap::new();
+        args.insert("reason".to_string(), serde_json::to_string(reason)?);
+        self.post(&format!("/accounts/{}/reject", account_id), Some(&args))
+    }
+
+    /// https://stripe.com/docs/api#list_accounts
+    pub fn list_accounts(
+        &self,
+        args: Option<&BTreeMap<String, String>>
+    ) -> Result<ApiList<Account>> {
+        self.get("/accounts", args)
+    }
+
+    /// https://stripe.com/docs/api#create_fee_refund
+    pub fn create_fee_refund(
+        &self,
+        fee_id: &str,
+        amount: Option<i64>,
+        metadata: Option<&BTreeMap<String, String>>,
+    ) -> Result<FeeRefund> {
+        let amount = amount.map(|amount| {
+            let mut map = BTreeMap::new();
+            map.insert("amount".to_string(), amount.to_string());
+            map
+        });
+        let metadata = metadata.map(|m| structured("metadata", m));
+        let args = or_join(amount, metadata);
+        self.post(&format!("/application_fees/{}/refunds", fee_id), args.as_ref())
+    }
+
+    /// https://stripe.com/docs/api#retrieve_fee_refund
+    pub fn retrieve_fee_refund(&self, fee_id: &str, refund_id: &str) -> Result<FeeRefund> {
+        self.get(&format!("/application_fees/{}/refunds/{}", fee_id, refund_id), None)
+    }
+
+    /// https://stripe.com/docs/api#update_fee_refund
+    pub fn update_fee_refund(
+        &self,
+        fee_id: &str,
+        refund_id: &str,
+        metadata: &BTreeMap<String, String>
+    ) -> Result<FeeRefund> {
+        let args = structured("metadata", metadata);
+        self.post(&format!("/application_fees/{}/refunds/{}", fee_id, refund_id), Some(&args))
+    }
+
+    /// https://stripe.com/docs/api#list_fee_refunds
+    pub fn list_fee_refunds(
+        &self,
+        fee_id: &str,
+        args: Option<&BTreeMap<String, String>>
+    ) -> Result<ApiList<FeeRefund>> {
+        self.get(&format!("/application_fees/{}/refunds", fee_id), args)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_application_fee
+    pub fn retrieve_application_fee(&self, fee_id: &str) -> Result<ApplicationFee> {
+        self.get(&format!("/application_fees/{}", fee_id), None)
+    }
+
+    /// https://stripe.com/docs/api#list_application_fees
+    pub fn list_application_fees(
+        &self,
+        created_constraint: Option<&TimeConstraint>,
+        args: Option<&BTreeMap<String, String>>
+    ) -> Result<ApiList<ApplicationFee>> {
+        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        let args = args.map(|a| a.clone());
+        self.get("/application_fees", or_join(created_constraint, args).as_ref())
+    }
+
+    /// https://stripe.com/docs/api#create_recipient
+    pub fn create_recipient(
+        &self,
+        args: &BTreeMap<String, String>,
+        bank_account_token_or_args: Option<Either<String, &BTreeMap<String, String>>>,
+        card_token_or_args: Option<Either<String, &BTreeMap<String, String>>>,
+        metadata: Option<&BTreeMap<String, String>>,
+    ) -> Result<Recipient> {
+        let mut args = args.clone();
+        if let Some(bank_account) = bank_account_token_or_args { match bank_account {
+            Left(token)    => { args.insert("bank_account".to_string(), token); },
+            Right(account) => { args.extend(structured("bank_account", account)); },
+        }}
+        if let Some(card) = card_token_or_args { match card {
+            Left(token) => { args.insert("card".to_string(), token); },
+            Right(card) => { args.extend(structured("card", card)); },
+        }}
+        if let Some(metadata) = metadata {
+            args.extend(structured("metadata", metadata));
+        }
+        self.post("/recipients", Some(&args))
+    }
+
+    /// https://stripe.com/docs/api#retrieve_recipient
+    pub fn retrieve_recipient(&self, recipient_id: &str) -> Result<Recipient> {
+        self.get(&format!("/recipients/{}", recipient_id), None)
+    }
+
+    /// https://stripe.com/docs/api#update_recipient
+    pub fn update_recipient(
+        &self,
+        recipient_id: &str,
+        args: Option<&BTreeMap<String, String>>,
+        bank_account_token_or_args: Option<Either<String, &BTreeMap<String, String>>>,
+        card_token_or_args: Option<Either<String, &BTreeMap<String, String>>>,
+        metadata: Option<&BTreeMap<String, String>>,
+    ) -> Result<Recipient> {
+        let mut args = args.map(|a| a.clone()).unwrap_or(BTreeMap::new());
+        if let Some(bank_account) = bank_account_token_or_args { match bank_account {
+            Left(token)    => { args.insert("bank_account".to_string(), token); },
+            Right(account) => { args.extend(structured("bank_account", account)); },
+        }}
+        if let Some(card) = card_token_or_args { match card {
+            Left(token) => { args.insert("card".to_string(), token); },
+            Right(card) => { args.extend(structured("card", card)); },
+        }}
+        if let Some(metadata) = metadata {
+            args.extend(structured("metadata", metadata));
+        }
+        self.post(&format!("/recipients/{}", recipient_id), Some(&args))
+    }
+
+    /// https://stripe.com/docs/api#delete_recipient
+    pub fn delete_recipient(&self, recipient_id: &str) -> Result<Delete> {
+        self.delete(&format!("/recipients/{}", recipient_id))
+    }
+
+    /// https://stripe.com/docs/api#list_recipients
+    pub fn list_recipients(
+        &self,
+        created_constraint: Option<&TimeConstraint>,
+        args: Option<&BTreeMap<String, String>>,
+    ) -> Result<ApiList<Recipient>> {
+        let created_constraint = created_constraint.map(|c| structured("created", &c.to_map()));
+        let args = args.map(|a| a.clone());
+        self.get("/recipients", or_join(created_constraint, args).as_ref())
+    }
+
+    /// https://stripe.com/docs/api#list_country_specs
+    pub fn list_country_specs(
+        &self,
+        args: Option<&BTreeMap<String, String>>
+    ) -> Result<ApiList<CountrySpec>> {
+        self.get("/country_specs", args)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_country_spec
+    pub fn retrieve_country_spec(&self, country_id: &str) -> Result<CountrySpec> {
+        self.get(&format!("/country_specs/{}", country_id), None)
+    }
+
+    /// https://stripe.com/docs/api#account_create_bank_account
+    pub fn account_create_bank_account(
+        &self,
+        account_id: &str,
+        bank_account_token_or_args: Either<String, &BTreeMap<String, String>>,
+        customer: bool,
+        default_for_currency: bool,
+        metadata: Option<&BTreeMap<String, String>>,
+    ) -> Result<BankAccount> {
+        let mut args = BTreeMap::new();
+        let key = if customer { "source".to_string() } else { "external_account".to_string() };
+        match bank_account_token_or_args {
+            Left(token) => { args.insert(key, token); },
+            Right(account) => { args.extend(structured(&key, account)); },
+        }
+        args.insert("default_for_currency".to_string(), default_for_currency.to_string());
+        if let Some(metadata) = metadata {
+            args.extend(structured("metadata", metadata));
+        }
+        self.post(&format!("/accounts/{}/external_accounts", account_id), Some(&args))
+    }
+
     pub fn get<T: Deserialize>(
         &self,
         endpoint: &str,
-        params: Option<&BTreeMap<String, String>>
+        args: Option<&BTreeMap<String, String>>
     ) -> Result<T> {
-        let url = if let Some(params) = params {
-            StripeClient::endpoint(&format!("{}?{}", endpoint, params.encoded_string()))
+        let url = if let Some(args) = args {
+            StripeClient::endpoint(&format!("{}?{}", endpoint, args.encoded_string()))
         } else {
             StripeClient::endpoint(endpoint)
         };
@@ -430,12 +633,14 @@ impl StripeClient {
     pub fn post<T: Deserialize>(
         &self,
         endpoint: &str,
-        body: Option<&[u8]>
+        args: Option<&BTreeMap<String, String>>,
     ) -> Result<T> {
+        let body = args.map(|b| b.encoded_string());
         let mut req_builder = self.client.post(&StripeClient::endpoint(endpoint))
             .headers(self.default_headers());
-        if let Some(body) = body {
-            req_builder = req_builder.body(body);
+
+        if let Some(ref body) = body.as_ref() {
+            req_builder = req_builder.body(body.as_bytes());
         }
         StripeClient::parse_response::<T>(req_builder.send()?)
     }

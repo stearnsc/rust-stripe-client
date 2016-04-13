@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use serde::ser::Error;
 use serde;
 use super::StripeObject;
@@ -5,6 +6,7 @@ use super::StripeObject;
 #[derive(Debug, Clone, Deserialize)]
 pub struct BankAccount {
     pub id: String,
+    pub account: Option<String>,
     pub account_holder_name: String,
     pub account_holder_type: AccountHolderType,
     pub bank_name: String,
@@ -12,8 +14,9 @@ pub struct BankAccount {
     pub currency: String,
     pub fingerprint: String,
     pub last4: Option<String>,
+    pub metadata: Option<BTreeMap<String, String>>,
     pub routing_number: String,
-    pub status: BankAccountStatus
+    pub status: BankAccountStatus,
 }
 
 impl StripeObject for BankAccount {

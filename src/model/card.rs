@@ -1,6 +1,7 @@
 use serde;
 use std::collections::BTreeMap;
 use super::customer::Customer;
+use super::StripeObject;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Card {
@@ -30,6 +31,12 @@ pub struct Card {
     pub name: Option<String>,
     pub recipient: Option<String>,
     pub tokenization_method: Option<TokenizationMethod>,
+}
+
+impl StripeObject for Card {
+    fn id(&self) -> &str {
+        &self.id
+    }
 }
 
 #[derive(Clone, Debug)]
