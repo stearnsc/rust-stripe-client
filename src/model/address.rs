@@ -1,6 +1,6 @@
-use std::collections::BTreeMap;
+use url_encodable::UrlEncodable;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Address {
     pub line1: String,
     pub line2: Option<String>,
@@ -10,27 +10,28 @@ pub struct Address {
     pub state: Option<String>
 }
 
-impl Into<BTreeMap<String, String>> for Address {
-    fn into(self) -> BTreeMap<String, String> {
-        let mut map = BTreeMap::new();
-        match self { Address { line1, line2, city, country, postal_code, state } => {
-            map.insert("line1".to_string(), line1);
-            if let Some(line2) = line2 {
-                map.insert("line2".to_string(), line2);
+impl UrlEncodable for Address {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        let mut vec = Vec::new();
+        match *self { Address {
+            ref line1,
+            ref line2,
+            ref city,
+            ref country,
+            ref postal_code,
+            ref state
+        } => {
+            vec.push(("line1".to_string(), line1.to_string()));
+            if let &Some(ref line2) = line2 {
+                vec.push(("line2".to_string(), line2.to_string()));
             }
-            map.insert("city".to_string(), city);
-            map.insert("country".to_string(), country);
-            map.insert("postal_code".to_string(), postal_code);
-            if let Some(state) = state {
-                map.insert("state".to_string(), state);
+            vec.push(("city".to_string(), city.to_string()));
+            vec.push(("country".to_string(), country.to_string()));
+            vec.push(("postal_code".to_string(), postal_code.to_string()));
+            if let &Some(ref state) = state {
+                vec.push(("state".to_string(), state.to_string()));
             }
         }}
-        map
-    }
-}
-
-impl<'a> Into<BTreeMap<String, String>> for &'a Address {
-    fn into(self) -> BTreeMap<String, String> {
-        self.clone().into()
+        vec
     }
 }

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct TransferReversal {
     pub id: String,
     pub amount: i64,

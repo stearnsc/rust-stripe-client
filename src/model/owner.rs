@@ -2,7 +2,7 @@ use super::address::Address;
 use super::date_of_birth::DateOfBirth;
 use super::verification::Verification;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Owner {
     address: Address,
     dob: DateOfBirth,

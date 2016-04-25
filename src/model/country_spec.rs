@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct CountrySpec {
     pub id: String,
     pub default_currency: String,
@@ -17,7 +17,7 @@ impl StripeObject for CountrySpec {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct VerificationFields {
     pub minimum: Vec<String>,
     pub additional: Vec<String>,

@@ -4,7 +4,7 @@ use super::date_of_birth::DateOfBirth;
 use super::owner::Owner;
 use super::verification::Verification;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct LegalEntity {
     #[serde(rename="type")]
     pub entity_type: String,
@@ -21,7 +21,7 @@ pub struct LegalEntity {
     pub additional_owners: Vec<Owner>
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum LegalEntityType {
     Individual,
     Company,

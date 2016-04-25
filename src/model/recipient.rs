@@ -5,7 +5,7 @@ use super::api_list::ApiList;
 use super::card::Card;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Recipient {
     pub id: String,
     pub active_account: Option<Account>,
@@ -26,7 +26,7 @@ impl StripeObject for Recipient {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum RecipientType {
     Individual,
     Corporation,

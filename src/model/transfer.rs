@@ -4,7 +4,7 @@ use super::api_list::ApiList;
 use super::source_type::SourceType;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Transfer {
     pub id: String,
     pub amount: i64,
@@ -37,7 +37,7 @@ impl StripeObject for Transfer {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum TransferStatus {
     Paid,
     Pending,
@@ -62,7 +62,7 @@ impl serde::Deserialize for TransferStatus {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum TransferType {
     Card,
     BankAccount,
@@ -83,7 +83,7 @@ impl serde::Deserialize for TransferType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum TransferFailureCode {
     InsufficientFunds,
     AccountClosed,
@@ -118,7 +118,7 @@ impl serde::Deserialize for TransferFailureCode {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Reversal {
     pub id: String,
     pub amount: i64,

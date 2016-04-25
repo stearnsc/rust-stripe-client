@@ -1,36 +1,82 @@
-use std::collections::BTreeMap;
+use serde;
 use super::address::Address;
-use util::structured;
+use super::StripeObject;
+use url_encodable::UrlEncodable;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Shipping {
     pub address: Address,
     pub carrier: Option<String>,
     pub name: String,
-    pub phone: String,
+    pub phone: Option<String>,
     pub tracking_number: Option<String>
 }
 
-impl Into<BTreeMap<String, String>> for Shipping {
-    fn into(self) -> BTreeMap<String, String> {
-        let mut map = BTreeMap::new();
-        match self { Shipping { address, carrier, name, phone, tracking_number } => {
-            map.extend(structured("address", address.into()));
-            if let Some(carrier) = carrier {
-                map.insert("carrier".to_string(), carrier);
+impl UrlEncodable for Shipping {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        let mut vec = vec![];
+        match *self { Shipping {
+            ref address,
+            ref carrier,
+            ref name,
+            ref phone,
+            ref tracking_number
+        } => {
+            vec.extend(UrlEncodable::named("address", address));
+            if let &Some(ref carrier) = carrier {
+                vec.push(("carrier".to_string(), carrier.to_string()));
             }
-            map.insert("name".to_string(), name);
-            map.insert("phone".to_string(), phone);
-            if let Some(tracking_number) = tracking_number {
-                map.insert("tracking_number".to_string(), tracking_number);
+            vec.push(("name".to_string(), name.to_string()));
+            if let &Some(ref phone) = phone {
+                vec.push(("phone".to_string(), phone.to_string()));
+            }
+            if let &Some(ref tracking_number) = tracking_number {
+                vec.push(("tracking_number".to_string(), tracking_number.to_string()));
             }
         }}
-        map
+        vec
     }
 }
 
-impl<'a> Into<BTreeMap<String, String>> for &'a Shipping {
-    fn into(self) -> BTreeMap<String, String> {
-        self.clone().into()
+#[derive(Clone, Debug, Deserialize)]
+pub struct ShippingMethod {
+    pub id: String,
+    pub amount: i64,
+    pub currency: String,
+    pub delivery_estimate: Option<DeliveryEstimate>,
+    pub description: Option<String>,
+}
+
+impl StripeObject for ShippingMethod {
+    fn id(&self) -> &str {
+        &self.id
+    }
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct DeliveryEstimate {
+    pub date: Option<String>,
+    pub earliest: Option<String>,
+    pub latest: Option<String>,
+    #[serde(rename="type")]
+    pub estimate_type: DeliveryEstimateType,
+}
+
+#[derive(Clone, Debug)]
+pub enum DeliveryEstimateType {
+    Range,
+    Exact,
+    Unknown(String)
+}
+
+impl serde::Deserialize for DeliveryEstimateType {
+    fn deserialize<D>(deserializer: &mut D) -> Result<DeliveryEstimateType, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match String::deserialize(deserializer)?.as_ref() {
+            "range" => DeliveryEstimateType::Range,
+            "exact" => DeliveryEstimateType::Exact,
+            unknown => DeliveryEstimateType::Unknown(String::from(unknown)),
+        })
     }
 }

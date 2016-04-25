@@ -1,7 +1,8 @@
 use serde;
 use std::collections::BTreeMap;
+use std::fmt;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Coupon {
     pub id: String,
     pub amount_off: Option<i64>,
@@ -18,12 +19,23 @@ pub struct Coupon {
     pub valid: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum CouponDuration {
     Forever,
     Once,
     Repeating,
     Unknown(String),
+}
+
+impl fmt::Display for CouponDuration {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            CouponDuration::Forever        => write!(f, "forever"),
+            CouponDuration::Once           => write!(f, "once"),
+            CouponDuration::Repeating      => write!(f, "repeating"),
+            CouponDuration::Unknown(ref s) => write!(f, "{}", s),
+        }
+    }
 }
 
 impl serde::Deserialize for CouponDuration {

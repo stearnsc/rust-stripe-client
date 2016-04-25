@@ -1,6 +1,6 @@
 use serde;
 
-#[derive(Debug, Clone, Eq, Ord, PartialOrd, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialOrd, PartialEq)]
 pub enum SourceType {
     Card,
     BankAccount,

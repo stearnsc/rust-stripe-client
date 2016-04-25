@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 use super::StripeObject;
 
 /// https://stripe.com/docs/api#event_object
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Event {
     pub id: String,
     pub api_version: Option<String>,
@@ -25,13 +25,13 @@ impl StripeObject for Event {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct EventDataRaw {
     pub object: Value,
     pub previous_attributes: Option<BTreeMap<String, String>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct EventData {
     pub object: Value,
     pub id: String,

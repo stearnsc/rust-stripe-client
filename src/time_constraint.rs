@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use url_encodable::UrlEncodable;
 
 #[derive(Clone, Debug)]
 pub struct TimeConstraint {
@@ -37,46 +37,23 @@ impl TimeConstraint {
         self.lte = Some(timestamp);
         self
     }
-
-    pub fn to_map(&self) -> BTreeMap<String, String> {
-        let mut map = BTreeMap::new();
-        if let Some(gt) = self.gt {
-            map.insert("gt".to_string(), gt.to_string());
-        }
-        if let Some(gte) = self.gte {
-            map.insert("gte".to_string(), gte.to_string());
-        }
-        if let Some(lt) = self.lt {
-            map.insert("lt".to_string(), lt.to_string());
-        }
-        if let Some(lte) = self.lte {
-            map.insert("lte".to_string(), lte.to_string());
-        }
-        map
-    }
 }
 
-impl Into<BTreeMap<String, String>> for TimeConstraint {
-    fn into(self) -> BTreeMap<String, String> {
-        (&self).into()
-    }
-}
-
-impl<'a> Into<BTreeMap<String, String>> for &'a TimeConstraint {
-    fn into(self) -> BTreeMap<String, String> {
-        let mut map = BTreeMap::new();
+impl UrlEncodable for TimeConstraint {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        let mut vec = Vec::new();
         if let Some(gt) = self.gt {
-            map.insert("gt".to_string(), gt.to_string());
+            vec.push(("gt".to_string(), gt.to_string()));
         }
         if let Some(gte) = self.gte {
-            map.insert("gte".to_string(), gte.to_string());
+            vec.push(("gte".to_string(), gte.to_string()));
         }
         if let Some(lt) = self.lt {
-            map.insert("lt".to_string(), lt.to_string());
+            vec.push(("lt".to_string(), lt.to_string()));
         }
         if let Some(lte) = self.lte {
-            map.insert("lte".to_string(), lte.to_string());
+            vec.push(("lte".to_string(), lte.to_string()));
         }
-        map
+        vec
     }
 }

@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use super::StripeObject;
 
 /// https://stripe.com/docs/api#refund_object
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Refund {
     pub id: String,
     pub amount: i64,
@@ -23,7 +23,7 @@ impl StripeObject for Refund {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum RefundReason {
     Duplicate,
     Fraudulent,

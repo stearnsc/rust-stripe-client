@@ -6,7 +6,7 @@ use super::source::Source;
 use super::StripeObject;
 use super::subscription::Subscription;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Customer {
     id: String,
     account_balance: i64,

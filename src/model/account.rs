@@ -4,7 +4,7 @@ use super::legal_entity::LegalEntity;
 use super::StripeObject;
 use super::verification::Verification;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Account {
     pub id: String,
     pub business_name: Option<String>,
@@ -39,13 +39,13 @@ impl StripeObject for Account {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct DeclineChargeOn {
     pub avs_failure: bool,
     pub cvs_failure: bool
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct ExternalAccount {
     pub id: String,
     pub customer: String,
@@ -58,14 +58,14 @@ impl StripeObject for ExternalAccount {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct TosAcceptance {
     date: i64,
     ip: String,
     user_agent: String
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct TransferSchedule {
     delay_days: i64,
     interval: String,

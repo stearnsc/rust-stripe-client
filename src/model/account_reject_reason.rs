@@ -1,7 +1,7 @@
 use serde;
 use serde::de::Error;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum AccountRejectReason {
     Fraud,
     TermsOfService,

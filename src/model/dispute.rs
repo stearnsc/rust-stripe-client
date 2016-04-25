@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use super::balance_transaction::BalanceTransaction;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Dispute {
     pub id: String,
     pub amount: i64,
@@ -25,7 +25,7 @@ impl StripeObject for Dispute {
         &self.id
     }
 }
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct DisputeEvidence {
     pub access_activity_log: Option<String>,
     pub billing_address: Option<String>,
@@ -56,7 +56,7 @@ pub struct DisputeEvidence {
     pub uncategorized_text: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct EvidenceDetails {
     due_by: Option<i64>,
     has_evidence: bool,

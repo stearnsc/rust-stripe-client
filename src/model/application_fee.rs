@@ -2,7 +2,7 @@ use super::api_list::ApiList;
 use super::fee_refund::FeeRefund;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct ApplicationFee {
     pub id: String,
     pub account: String,

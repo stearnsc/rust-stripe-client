@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use super::api_list::ApiList;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct BitcoinReceiver {
     pub id: String,
     pub active: bool,
@@ -33,7 +33,7 @@ impl StripeObject for BitcoinReceiver {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct BitcoinTransaction {
     pub id: String,
     pub amount: i64,

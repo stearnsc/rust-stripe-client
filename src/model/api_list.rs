@@ -1,6 +1,6 @@
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct ApiList<T: StripeObject> {
     pub data: Vec<T>,
     pub has_more: bool,

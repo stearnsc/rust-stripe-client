@@ -4,7 +4,7 @@ use super::discount::Discount;
 use super::interval::Interval;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Subscription {
     pub id: String,
     pub application_fee_percent: Option<f64>,
@@ -31,7 +31,7 @@ impl StripeObject for Subscription {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct SubscriptionPlan {
     pub id: String,
     pub amount: i64,

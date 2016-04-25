@@ -3,7 +3,7 @@ use super::bank_account::BankAccount;
 use super::card::Card;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Token {
     pub id: String,
     pub bank_account: Option<BankAccount>,
@@ -22,7 +22,7 @@ impl StripeObject for Token {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum TokenType {
     Card,
     BankAccount,

@@ -1,6 +1,6 @@
 use super::coupon::Coupon;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Discount {
     pub coupon: Coupon,
     pub customer: String,

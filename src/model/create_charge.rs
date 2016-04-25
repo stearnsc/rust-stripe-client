@@ -3,7 +3,7 @@ use model::Shipping;
 use serde_json;
 use std::collections::BTreeMap;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct CreateCharge {
     pub amount: i64,
     pub currency: String,

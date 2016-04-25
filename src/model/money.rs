@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use super::source_type::SourceType;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Money {
     pub currency: String,
     pub amount: i64,

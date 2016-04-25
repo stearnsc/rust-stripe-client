@@ -1,12 +1,12 @@
 use std;
 use serde;
 
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct StripeErrorWrapper {
     pub error: StripeError
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct StripeError {
     #[serde(rename="type")]
     pub kind: StripeErrorKind,
@@ -15,7 +15,7 @@ pub struct StripeError {
     pub param: Option<String>
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum StripeErrorKind {
     ApiConnectionError,
     ApiError,
@@ -42,7 +42,7 @@ impl serde::Deserialize for StripeErrorKind {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum StripeErrorCode {
     InvalidNumber,
     InvalidExpiryMonth,

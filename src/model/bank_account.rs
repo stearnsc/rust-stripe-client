@@ -3,7 +3,7 @@ use serde::ser::Error;
 use serde;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct BankAccount {
     pub id: String,
     pub account: Option<String>,
@@ -25,7 +25,7 @@ impl StripeObject for BankAccount {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum AccountHolderType {
     Company,
     Individual,
@@ -56,7 +56,7 @@ impl serde::Serialize for AccountHolderType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum BankAccountStatus {
     New,
     Validated,

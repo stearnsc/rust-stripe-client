@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use super::customer::Customer;
 use super::StripeObject;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Card {
     pub id: String,
     pub account: Option<String>,
