@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
+use super::currency::Currency;
 use super::dispute::Dispute;
 use super::refund::Refund;
 use super::shipping::Shipping;
@@ -14,7 +15,7 @@ pub struct Charge {
     pub balance_transaction: String,
     pub captured: bool,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub customer: String,
     pub description: Option<String>,
     pub dispute: Option<Dispute>,

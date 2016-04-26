@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
+use super::currency::Currency;
 use super::StripeObject;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -12,7 +13,7 @@ pub struct BitcoinReceiver {
     pub bitcoin_amount_received: i64,
     pub bitcoin_uri: String,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub customer: Option<String>,
     pub description: Option<String>,
     pub email: Option<String>,
@@ -39,7 +40,7 @@ pub struct BitcoinTransaction {
     pub amount: i64,
     pub bitcoin_amount: i64,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub receiver: String
 }
 

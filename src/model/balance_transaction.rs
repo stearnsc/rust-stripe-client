@@ -1,5 +1,6 @@
 use serde;
 use super::api_list::ApiList;
+use super::currency::Currency;
 use super::StripeObject;
 use super::transfer::Transfer;
 
@@ -9,7 +10,7 @@ pub struct BalanceTransaction {
     pub amount: i64,
     pub available_on: i64,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub description: String,
     pub fee: i64,
     pub fee_details: Vec<FeeDetails>,
@@ -31,7 +32,7 @@ impl StripeObject for BalanceTransaction {
 pub struct FeeDetails {
     pub amount: i64,
     pub application: String,
-    pub currency: String,
+    pub currency: Currency,
     pub description: String,
     #[serde(rename="type")]
     pub fee_type: String,

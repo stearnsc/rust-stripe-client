@@ -1,4 +1,5 @@
 use serde;
+use std::fmt;
 
 #[derive(Clone, Debug)]
 pub enum Interval {
@@ -7,6 +8,19 @@ pub enum Interval {
     Month,
     Year,
     Unknown(String),
+}
+
+use self::Interval::*;
+impl fmt::Display for Interval {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Day => write!(f, "day"),
+            Week => write!(f, "week"),
+            Month => write!(f, "month"),
+            Year => write!(f, "year"),
+            Unknown(ref s) => write!(f, "{}", s),
+        }
+    }
 }
 
 impl serde::Deserialize for Interval {

@@ -1,6 +1,7 @@
 use serde;
 use std::collections::BTreeMap;
 use super::balance_transaction::BalanceTransaction;
+use super::currency::Currency;
 use super::StripeObject;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -10,7 +11,7 @@ pub struct Dispute {
     pub balance_transactions: Vec<BalanceTransaction>,
     pub charge: String,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub evidence: DisputeEvidence,
     pub evidence_details: EvidenceDetails,
     pub is_charge_refundable: bool,

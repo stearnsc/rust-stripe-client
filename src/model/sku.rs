@@ -2,6 +2,7 @@ use either::Either;
 use serde;
 use std::collections::BTreeMap;
 use std::fmt;
+use super::currency::Currency;
 use super::product::Product;
 use super::dimensions::Dimensions;
 use super::StripeObject;
@@ -13,7 +14,7 @@ pub struct Sku {
     pub active: bool,
     pub attributes: BTreeMap<String, String>,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub image: Option<String>,
     pub inventory: Inventory,
     pub livemode: bool,

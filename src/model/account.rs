@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
+use super::currency::Currency;
 use super::legal_entity::LegalEntity;
 use super::StripeObject;
 use super::verification::Verification;
@@ -14,7 +15,7 @@ pub struct Account {
     pub country: String,
     pub debit_negative_balances: Option<bool>,
     pub decline_charge_on: Option<DeclineChargeOn>,
-    pub default_currency: String,
+    pub default_currency: Currency,
     pub details_submitted: bool,
     pub display_name: Option<String>,
     pub email: String,

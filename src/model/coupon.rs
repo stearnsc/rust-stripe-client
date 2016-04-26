@@ -1,13 +1,15 @@
 use serde;
 use std::collections::BTreeMap;
 use std::fmt;
+use super::currency::Currency;
+use super::StripeObject;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Coupon {
     pub id: String,
     pub amount_off: Option<i64>,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub duration: CouponDuration,
     pub duration_in_months: Option<i64>,
     pub livemode: bool,
@@ -17,6 +19,12 @@ pub struct Coupon {
     pub redeem_by: i64,
     pub times_redeemed: i64,
     pub valid: bool,
+}
+
+impl StripeObject for Coupon {
+    fn id(&self) -> &str {
+        &self.id
+    }
 }
 
 #[derive(Clone, Debug)]

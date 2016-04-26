@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
+use super::currency::Currency;
 use super::discount::Discount;
 use super::shipping::Shipping;
 use super::source::Source;
@@ -11,7 +12,7 @@ pub struct Customer {
     id: String,
     account_balance: i64,
     created: i64,
-    currency: String,
+    currency: Currency,
     default_source: Option<String>,
     delinquent: bool,
     description: Option<String>,

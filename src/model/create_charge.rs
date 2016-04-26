@@ -1,4 +1,5 @@
 use errors::error::Error;
+use model::currency::Currency;
 use model::Shipping;
 use serde_json;
 use std::collections::BTreeMap;
@@ -6,7 +7,7 @@ use std::collections::BTreeMap;
 #[derive(Clone, Debug)]
 pub struct CreateCharge {
     pub amount: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub application_fee: Option<i64>,
     pub capture: Option<bool>,
     pub description: Option<String>,
@@ -20,10 +21,10 @@ pub struct CreateCharge {
 }
 
 impl CreateCharge {
-    pub fn from_customer(customer_id: &str, amount: i64, currency: &str) -> CreateCharge {
+    pub fn from_customer(customer_id: &str, amount: i64, currency: &Currency) -> CreateCharge {
         CreateCharge {
             amount: amount,
-            currency: String::from(currency),
+            currency: currency.clone(),
             application_fee: None,
             capture: None,
             description: None,
@@ -37,10 +38,10 @@ impl CreateCharge {
         }
     }
 
-    pub fn from_source(source_id: &str, amount: i64, currency: &str) -> CreateCharge {
+    pub fn from_source(source_id: &str, amount: i64, currency: &Currency) -> CreateCharge {
         CreateCharge {
             amount: amount,
-            currency: String::from(currency),
+            currency: currency.clone(),
             application_fee: None,
             capture: None,
             description: None,
@@ -57,7 +58,7 @@ impl CreateCharge {
     pub fn as_map(self) -> Result<BTreeMap<String, String>, Error> {
         let mut map: BTreeMap<&'static str, String> = BTreeMap::new();
         map.insert("amount", self.amount.to_string());
-        map.insert("currency", self.currency);
+        map.insert("currency", self.currency.to_string());
         if let Some(application_fee) = self.application_fee {
             map.insert("application_fee", application_fee.to_string());
         }

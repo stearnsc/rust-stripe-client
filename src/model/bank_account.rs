@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use serde::ser::Error;
 use serde;
+use super::currency::Currency;
 use super::StripeObject;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -11,7 +12,7 @@ pub struct BankAccount {
     pub account_holder_type: AccountHolderType,
     pub bank_name: String,
     pub country: String,
-    pub currency: String,
+    pub currency: Currency,
     pub fingerprint: String,
     pub last4: Option<String>,
     pub metadata: Option<BTreeMap<String, String>>,

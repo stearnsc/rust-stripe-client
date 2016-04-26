@@ -1,5 +1,6 @@
 use serde;
 use super::address::Address;
+use super::currency::Currency;
 use super::StripeObject;
 use url_encodable::UrlEncodable;
 
@@ -42,7 +43,7 @@ impl UrlEncodable for Shipping {
 pub struct ShippingMethod {
     pub id: String,
     pub amount: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub delivery_estimate: Option<DeliveryEstimate>,
     pub description: Option<String>,
 }

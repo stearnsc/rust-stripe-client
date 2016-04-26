@@ -1,6 +1,7 @@
 use serde;
 use std::collections::BTreeMap;
 use super::api_list::ApiList;
+use super::currency::Currency;
 use super::source_type::SourceType;
 use super::StripeObject;
 
@@ -12,7 +13,7 @@ pub struct Transfer {
     pub application_fee: String,
     pub balance_transaction: String,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub date: i64,
     pub description: Option<String>,
     pub destination: String,
@@ -124,7 +125,7 @@ pub struct Reversal {
     pub amount: i64,
     pub balance_transaction: String,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub metadata: BTreeMap<String, String>,
     pub transfer: String
 }

@@ -1,5 +1,6 @@
 use serde;
 use std::collections::BTreeMap;
+use super::currency::Currency;
 use super::StripeObject;
 
 /// https://stripe.com/docs/api#refund_object
@@ -10,7 +11,7 @@ pub struct Refund {
     pub balance_transaction: Option<String>,
     pub charge: String,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub description: Option<String>,
     pub metadata: Option<BTreeMap<String, String>>,
     pub reason: RefundReason,

@@ -1,7 +1,9 @@
+use either::Either;
 use serde;
 use std::collections::BTreeMap;
+use super::customer::Customer;
 use super::discount::Discount;
-use super::interval::Interval;
+use super::plan::Plan;
 use super::StripeObject;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -12,11 +14,11 @@ pub struct Subscription {
     pub canceled_at: Option<i64>,
     pub current_period_end: Option<i64>,
     pub current_period_start: Option<i64>,
-    pub customer: String,
+    pub customer: Either<String, Customer>,
     pub discount: Discount,
     pub ended_at: Option<i64>,
     pub metadata: Option<BTreeMap<String, String>>,
-    pub plan: SubscriptionPlan,
+    pub plan: Plan,
     pub quantity: i64,
     pub start: i64,
     pub status: SubscriptionStatus,
@@ -26,27 +28,6 @@ pub struct Subscription {
 }
 
 impl StripeObject for Subscription {
-    fn id(&self) -> &str {
-        &self.id
-    }
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct SubscriptionPlan {
-    pub id: String,
-    pub amount: i64,
-    pub created: i64,
-    pub currency: String,
-    pub interval: Interval,
-    pub interval_count: i64,
-    pub livemode: bool,
-    pub metadata: Option<BTreeMap<String, String>>,
-    pub name: String,
-    pub statement_descriptor: Option<String>,
-    pub trial_period_days: Option<i64>,
-}
-
-impl StripeObject for SubscriptionPlan {
     fn id(&self) -> &str {
         &self.id
     }

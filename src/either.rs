@@ -1,6 +1,6 @@
 use serde;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub enum Either<L, R> {
     Left(L),
     Right(R)

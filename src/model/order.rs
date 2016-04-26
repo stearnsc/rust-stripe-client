@@ -1,6 +1,7 @@
 use serde;
 use std::collections::BTreeMap;
 use std::fmt;
+use super::currency::Currency;
 use super::shipping::{Shipping, ShippingMethod};
 use super::StripeObject;
 use url_encodable::UrlEncodable;
@@ -13,7 +14,7 @@ pub struct Order {
     pub application_fee: Option<i64>,
     pub charge: Option<String>,
     pub created: i64,
-    pub currency: String,
+    pub currency: Currency,
     pub customer: String,
     pub email: Option<String>,
     pub external_coupon_code: Option<String>,
