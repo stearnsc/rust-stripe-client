@@ -14,6 +14,7 @@ pub trait UrlEncodable {
     }
 }
 
+//TODO move all of these to CallArgs
 impl UrlEncodable {
     pub fn list<T, S>(list_name: S, list: &Vec<T>) -> Vec<(String, String)>
         where T: Display, S: Display
@@ -68,6 +69,12 @@ impl UrlEncodable {
     }
 }
 
+impl<'a> UrlEncodable for &'a UrlEncodable {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        (*self).key_value_pairs()
+    }
+}
+
 impl<K, V> UrlEncodable for BTreeMap<K, V>
     where K: Display, V: Display
 {
@@ -103,6 +110,30 @@ impl<T: UrlEncodable> UrlEncodable for Option<T> {
             Some(ref t) => t.key_value_pairs(),
             None        => vec![]
         }
+    }
+}
+
+impl<V: Display> UrlEncodable for (&'static str, Option<V>) {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        match *self {
+            (key, Some(ref v)) => vec![(key.to_string(), v.to_string())],
+            (_,   None)        => vec![]
+        }
+    }
+}
+
+impl<'a, V: Display> UrlEncodable for (&'static str, &'a Option<V>) {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        match *self {
+            (key, &Some(ref v)) => vec![(key.to_string(), v.to_string())],
+            (_,   &None)        => vec![]
+        }
+    }
+}
+
+impl UrlEncodable for () {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        Vec::new()
     }
 }
 

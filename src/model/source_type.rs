@@ -1,4 +1,5 @@
 use serde;
+use std::fmt;
 
 #[derive(Clone, Debug, Eq, Ord, PartialOrd, PartialEq)]
 pub enum SourceType {
@@ -23,16 +24,14 @@ impl serde::Deserialize for SourceType {
     }
 }
 
-impl serde::Serialize for SourceType {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-        where S: serde::Serializer
-    {
+impl fmt::Display for SourceType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            SourceType::Card            => str::serialize("card", serializer),
-            SourceType::BankAccount     => str::serialize("bank_account", serializer),
-            SourceType::BitcoinReceiver => str::serialize("bitcoin_receiver", serializer),
-            SourceType::AlipayAccount   => str::serialize("alipay_account", serializer),
-            SourceType::Other(ref s)    => str::serialize(s, serializer),
+            SourceType::Card            => write!(f, "card"),
+            SourceType::BankAccount     => write!(f, "bank_account"),
+            SourceType::BitcoinReceiver => write!(f, "bitcoin_receiver"),
+            SourceType::AlipayAccount   => write!(f, "alipay_account"),
+            SourceType::Other(ref s)    => write!(f, "{}", s),
         }
     }
 }

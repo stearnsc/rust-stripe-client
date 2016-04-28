@@ -13,12 +13,15 @@ use hyper::header::{Authorization, Basic, Headers};
 use hyper::status::StatusCode;
 use serde::de::Deserialize;
 use std::collections::BTreeMap;
+use std::fmt::Display;
 use std::io::Read;
 
+pub mod api;
 pub mod either;
 pub mod errors;
 pub mod model;
 
+mod call_args;
 mod idempotency_header;
 mod stripe_version_header;
 mod url_encodable;
@@ -40,9 +43,6 @@ const API_VERSION: &'static str = "2016-03-07";
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-const NO_PARAMS: &'static Option<(String, String)> = &None;
-const TOTAL_COUNT_PARAM: (&'static str, &'static str) = ("include[]", "total_count");
-
 #[derive(Debug)]
 pub struct StripeClient {
     pub key: String,
@@ -60,7 +60,7 @@ impl StripeClient {
 
     /// https://stripe.com/docs/api#retrieve_balance
     pub fn retrieve_balance(&self) -> Result<Balance> {
-        self.get("/balance", NO_PARAMS)
+        self.get("/balance", &())
     }
 
     /// https://stripe.com/docs/api#retrieve_balance_transaction
@@ -68,7 +68,7 @@ impl StripeClient {
         &self,
         balance_transaction_id: &str
     ) -> Result<BalanceTransaction> {
-        self.get(&format!("/balance/history/{}", balance_transaction_id), NO_PARAMS)
+        self.get(&format!("/balance/history/{}", balance_transaction_id), &())
     }
 
     /// https://stripe.com/docs/api#balance_history
@@ -105,7 +105,7 @@ impl StripeClient {
         &self,
         charge_id: &str
     ) -> Result<Charge> {
-        self.get(&format!("/charges/{}", charge_id), NO_PARAMS)
+        self.get(&format!("/charges/{}", charge_id), &())
     }
 
     /// https://stripe.com/docs/api#update_charge
@@ -134,11 +134,11 @@ impl StripeClient {
         source_type: Option<SourceType>,
     ) -> Result<ApiList<Charge>> {
         let source_type = match source_type {
-            Some(st) => Some(("source[object]", serde_json::to_string(&st)?)),
+            Some(st) => Some(("source[object]", st.to_string())),
             None => None,
         };
         self.get("/charges", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             args,
             UrlEncodable::named("created", &created_constraint),
             source_type
@@ -163,7 +163,7 @@ impl StripeClient {
 
     /// https://stripe.com/docs/api#retrieve_customer
     pub fn retrieve_customer(&self, customer_id: &str) -> Result<Customer> {
-        self.get(&format!("/customers/{}", customer_id), NO_PARAMS)
+        self.get(&format!("/customers/{}", customer_id), &())
     }
 
     /// https://stripe.com/docs/api#update_customer
@@ -195,7 +195,7 @@ impl StripeClient {
         created_constraint: Option<TimeConstraint>,
     ) -> Result<ApiList<Customer>> {
         self.get("/customers", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             args,
             UrlEncodable::named("created", &created_constraint)
         ))
@@ -206,7 +206,7 @@ impl StripeClient {
         &self,
         dispute_id: &str
     ) -> Result<Dispute> {
-        self.get(&format!("/disputes/{}", dispute_id), NO_PARAMS)
+        self.get(&format!("/disputes/{}", dispute_id), &())
     }
 
     /// https://stripe.com/docs/api#update_dispute
@@ -227,7 +227,7 @@ impl StripeClient {
         &self,
         dispute_id: &str
     ) -> Result<Dispute> {
-        self.post(&format!("/disputes/{}/close", dispute_id), NO_PARAMS)
+        self.post(&format!("/disputes/{}/close", dispute_id), &())
     }
 
     /// https://stripe.com/docs/api#list_disputes
@@ -244,7 +244,7 @@ impl StripeClient {
 
     /// https://stripe.com/docs/api#retrieve_event
     pub fn retrieve_event(&self, event_id: &str) -> Result<Event> {
-        self.get(&format!("/events/{}", event_id), NO_PARAMS)
+        self.get(&format!("/events/{}", event_id), &())
     }
 
     /// https://stripe.com/docs/api#list_events
@@ -254,7 +254,7 @@ impl StripeClient {
         created_constraint: Option<TimeConstraint>,
     ) -> Result<ApiList<Event>> {
         self.get("/events", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             args,
             UrlEncodable::named("created", &created_constraint)
         ))
@@ -279,7 +279,7 @@ impl StripeClient {
         &self,
         refund_id: &str
     ) -> Result<Refund> {
-        self.get(&format!("/refunds/{}", refund_id), NO_PARAMS)
+        self.get(&format!("/refunds/{}", refund_id), &())
     }
 
     /// https://stripe.com/docs/api#update_refund
@@ -342,7 +342,7 @@ impl StripeClient {
         &self,
         token_id: &str
     ) -> Result<Token> {
-        self.get(&format!("/tokens/{}", token_id), NO_PARAMS)
+        self.get(&format!("/tokens/{}", token_id), &())
     }
 
     /// https://stripe.com/docs/api#create_transfer
@@ -358,7 +358,7 @@ impl StripeClient {
         &self,
         transfer_id: &str
     ) -> Result<Transfer> {
-        self.get(&format!("/transfers/{}", transfer_id), NO_PARAMS)
+        self.get(&format!("/transfers/{}", transfer_id), &())
     }
 
     /// https://stripe.com/docs/api#update_transfer
@@ -407,7 +407,7 @@ impl StripeClient {
         transfer_id: &str,
         reversal_id: &str,
     ) -> Result<TransferReversal> {
-        self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), NO_PARAMS)
+        self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), &())
     }
 
     /// https://stripe.com/docs/api#update_transfer_reversal
@@ -436,7 +436,7 @@ impl StripeClient {
     /// https://stripe.com/docs/api#retrieve_account
     /// Fetch account associated with self.key
     pub fn retrieve_current_account(&self) -> Result<Account> {
-        self.get("/account", NO_PARAMS)
+        self.get("/account", &())
     }
 
     /// https://stripe.com/docs/api#retrieve_account
@@ -444,7 +444,7 @@ impl StripeClient {
         &self,
         account_id: &str
     ) -> Result<Account> {
-        self.get(&format!("/accounts/{}", account_id), NO_PARAMS)
+        self.get(&format!("/accounts/{}", account_id), &())
     }
 
     /// https://stripe.com/docs/api#create_account
@@ -510,7 +510,7 @@ impl StripeClient {
         fee_id: &str,
         refund_id: &str
     ) -> Result<FeeRefund> {
-        self.get(&format!("/application_fees/{}/refunds/{}", fee_id, refund_id), NO_PARAMS)
+        self.get(&format!("/application_fees/{}/refunds/{}", fee_id, refund_id), &())
     }
 
     /// https://stripe.com/docs/api#update_fee_refund
@@ -536,7 +536,7 @@ impl StripeClient {
 
     /// https://stripe.com/docs/api#retrieve_application_fee
     pub fn retrieve_application_fee(&self, fee_id: &str) -> Result<ApplicationFee> {
-        self.get(&format!("/application_fees/{}", fee_id), NO_PARAMS)
+        self.get(&format!("/application_fees/{}", fee_id), &())
     }
 
     /// https://stripe.com/docs/api#list_application_fees
@@ -546,7 +546,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<ApplicationFee>> {
         self.get("/application_fees", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             UrlEncodable::named("created", &created_constraint),
             args
         ))
@@ -573,7 +573,7 @@ impl StripeClient {
         &self,
         recipient_id: &str
     ) -> Result<Recipient> {
-        self.get(&format!("/recipients/{}", recipient_id), NO_PARAMS)
+        self.get(&format!("/recipients/{}", recipient_id), &())
     }
 
     /// https://stripe.com/docs/api#update_recipient
@@ -608,7 +608,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>,
     ) -> Result<ApiList<Recipient>> {
         self.get("/recipients", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             args,
             UrlEncodable::named("created", &created_constraint)
         ))
@@ -627,7 +627,7 @@ impl StripeClient {
         &self,
         country_id: &str
     ) -> Result<CountrySpec> {
-        self.get(&format!("/country_specs/{}", country_id), NO_PARAMS)
+        self.get(&format!("/country_specs/{}", country_id), &())
     }
 
     /// https://stripe.com/docs/api#account_create_bank_account
@@ -653,7 +653,7 @@ impl StripeClient {
     ) -> Result<BankAccount> {
         self.get(
             &format!("/accounts/{}/external_accounts/{}", account_id, bank_account_id),
-            NO_PARAMS
+            &()
         )
     }
 
@@ -710,7 +710,7 @@ impl StripeClient {
         account_id: &str,
         card_id: &str
     ) -> Result<Card> {
-        self.get(&format!("/accounts/{}/cards/{}", account_id, card_id), NO_PARAMS)
+        self.get(&format!("/accounts/{}/cards/{}", account_id, card_id), &())
     }
 
     /// https://stripe.com/docs/api#account_update_card
@@ -743,7 +743,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<Card>> {
         self.get(&format!("accounts/{}/external_accounts", account_id), &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             ("object", "card"),
             args
         ))
@@ -770,7 +770,7 @@ impl StripeClient {
         customer_id: &str,
         bank_account_id: &str
     ) -> Result<BankAccount> {
-        self.get(&format!("/customers/{}/sources/{}", customer_id, bank_account_id), NO_PARAMS)
+        self.get(&format!("/customers/{}/sources/{}", customer_id, bank_account_id), &())
     }
 
     /// https://stripe.com/docs/api#customer_update_bank_account
@@ -803,7 +803,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<BankAccount>> {
         self.get(&format!("/customers/{}/sources", customer_id), &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             ("object", "card"),
             args
         ))
@@ -826,7 +826,7 @@ impl StripeClient {
         &self,
         receiver_id: &str
     ) -> Result<BitcoinReceiver> {
-        self.get(&format!("/bitcoin/receivers/{}", receiver_id), NO_PARAMS)
+        self.get(&format!("/bitcoin/receivers/{}", receiver_id), &())
     }
 
     /// https://stripe.com/docs/api#list_bitcoin_receivers
@@ -836,7 +836,7 @@ impl StripeClient {
     ) -> Result<ApiList<BitcoinReceiver>> {
         self.get("/bitcoin/receivers", &(
             args,
-            TOTAL_COUNT_PARAM
+            ("include[]", "total_count")
         ))
     }
 
@@ -859,7 +859,7 @@ impl StripeClient {
         customer_id: &str,
         card_id: &str
     ) -> Result<Card> {
-        self.get(&format!("/customers/{}/sources/{}", customer_id, card_id), NO_PARAMS)
+        self.get(&format!("/customers/{}/sources/{}", customer_id, card_id), &())
     }
 
     /// https://stripe.com/docs/api#update_card
@@ -893,7 +893,7 @@ impl StripeClient {
     ) -> Result<ApiList<Card>> {
         self.get(
             &format!("/customers/{}/sources", customer_id),
-            &(args, TOTAL_COUNT_PARAM)
+            &(args, ("include[]", "total_count"))
         )
     }
 
@@ -918,7 +918,7 @@ impl StripeClient {
         &self,
         order_id: &str
     ) -> Result<Order> {
-        self.get(&format!("/orders/{}", order_id), NO_PARAMS)
+        self.get(&format!("/orders/{}", order_id), &())
     }
 
     /// https://stripe.com/docs/api#update_order
@@ -960,7 +960,7 @@ impl StripeClient {
         status_transitions: Option<BTreeMap<OrderStatus, TimeConstraint>>
     ) -> Result<ApiList<Order>> {
         self.get("/orders", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             UrlEncodable::named("created", &created_constraint),
             ids.map(|ids| UrlEncodable::list("ids", &ids)),
             args,
@@ -997,7 +997,7 @@ impl StripeClient {
         &self,
         product_id: &str
     ) -> Result<Product> {
-        self.get(&format!("/products/{}", product_id), NO_PARAMS)
+        self.get(&format!("/products/{}", product_id), &())
     }
 
     /// https://stripe.com/docs/api#update_product
@@ -1026,7 +1026,7 @@ impl StripeClient {
         ids: Option<Vec<String>>,
     ) -> Result<ApiList<Product>> {
         self.get("/products", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             args,
             ids.map(|ids| UrlEncodable::list("ids", &ids))
         ))
@@ -1069,7 +1069,7 @@ impl StripeClient {
         &self,
         sku_id: &str
     ) -> Result<Sku> {
-        self.get(&format!("/skus/{}", sku_id), NO_PARAMS)
+        self.get(&format!("/skus/{}", sku_id), &())
     }
 
     /// https://stripe.com/docs/api#update_sku
@@ -1097,7 +1097,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<Sku>> {
         self.get("/skus", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             UrlEncodable::named("attributes", &attributes),
             ids.map(|ids| UrlEncodable::list("ids", &ids)),
             args
@@ -1131,7 +1131,7 @@ impl StripeClient {
         &self,
         coupon_id: &str
     ) -> Result<Coupon> {
-        self.get(&format!("/coupons/{}", coupon_id), NO_PARAMS)
+        self.get(&format!("/coupons/{}", coupon_id), &())
     }
 
     /// https://stripe.com/docs/api#update_coupon
@@ -1160,7 +1160,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<Coupon>> {
         self.get("/coupons", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             UrlEncodable::named("created", &created_constraint),
             args
         ))
@@ -1200,7 +1200,7 @@ impl StripeClient {
         &self,
         invoice_id: &str
     ) -> Result<Invoice> {
-        self.get(&format!("/invoices/{}", invoice_id), NO_PARAMS)
+        self.get(&format!("/invoices/{}", invoice_id), &())
     }
 
     /// https://stripe.com/docs/api#invoice_lines
@@ -1210,7 +1210,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<InvoiceLineItem>> {
         self.get(&format!("/invoices/{}/lines", invoice_id), &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             args
         ))
     }
@@ -1245,7 +1245,7 @@ impl StripeClient {
         &self,
         invoice_id: &str
     ) -> Result<Invoice> {
-        self.post(&format!("/invoices/{}/pay", invoice_id), NO_PARAMS)
+        self.post(&format!("/invoices/{}/pay", invoice_id), &())
     }
 
     /// https://stripe.com/docs/api#list_invoices
@@ -1283,7 +1283,7 @@ impl StripeClient {
         &self,
         invoiceitem_id: &str
     ) -> Result<Invoiceitem> {
-        self.get(&format!("/invoiceitems/{}", invoiceitem_id), NO_PARAMS)
+        self.get(&format!("/invoiceitems/{}", invoiceitem_id), &())
     }
 
     /// https://stripe.com/docs/api#update_invoiceitem
@@ -1314,7 +1314,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<Invoiceitem>> {
         self.get("/invoiceitems", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             UrlEncodable::named("created", &created_constraint),
             args
         ))
@@ -1347,7 +1347,7 @@ impl StripeClient {
         &self,
         plan_id: &str
     ) -> Result<Plan> {
-        self.get(&format!("/plans/{}", plan_id), NO_PARAMS)
+        self.get(&format!("/plans/{}", plan_id), &())
     }
 
     /// https://stripe.com/docs/api#update_plan
@@ -1378,7 +1378,7 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<Plan>> {
         self.get("/plans", &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             UrlEncodable::named("created", &created_constraint),
             args
         ))
@@ -1405,7 +1405,7 @@ impl StripeClient {
         customer_id: &str,
         subscription_id: &str
     ) -> Result<Subscription> {
-        self.get(&format!("/customers/{}/subscriptions/{}", customer_id, subscription_id), NO_PARAMS)
+        self.get(&format!("/customers/{}/subscriptions/{}", customer_id, subscription_id), &())
     }
 
     /// https://stripe.com/docs/api#update_subscription
@@ -1446,14 +1446,14 @@ impl StripeClient {
         args: Option<BTreeMap<String, String>>
     ) -> Result<ApiList<Subscription>> {
         self.get(&format!("/customers/{}/subscriptions", customer_id), &(
-            TOTAL_COUNT_PARAM,
+            ("include[]", "total_count"),
             args
         ))
     }
 
-    pub fn get<T: Deserialize>(
+    pub fn get<T: Deserialize, E: Display>(
         &self,
-        endpoint: &str,
+        endpoint: E,
         args: &UrlEncodable
     ) -> Result<T> {
         let params = args.encoded_string();
@@ -1468,9 +1468,9 @@ impl StripeClient {
         StripeClient::parse_response::<T>(res)
     }
 
-    pub fn post<T: Deserialize>(
+    pub fn post<T: Deserialize, E: Display>(
         &self,
-        endpoint: &str,
+        endpoint: E,
         args: &UrlEncodable,
     ) -> Result<T> {
         let body = args.encoded_string();
@@ -1483,9 +1483,26 @@ impl StripeClient {
         StripeClient::parse_response::<T>(req_builder.send()?)
     }
 
-    pub fn delete<T: Deserialize>(
+    pub fn post_with_custom_headers<T: Deserialize, E: Display>(
         &self,
-        endpoint: &str
+        endpoint: E,
+        args: &UrlEncodable,
+        custom_headers: Headers
+    ) -> Result<T> {
+        let body = args.encoded_string();
+        let mut req_builder = self.client.post(&StripeClient::endpoint(endpoint))
+            .headers(self.default_headers())
+            .headers(custom_headers);
+
+        if !body.is_empty() {
+            req_builder = req_builder.body(body.as_bytes());
+        }
+        StripeClient::parse_response::<T>(req_builder.send()?)
+    }
+
+    pub fn delete<T: Deserialize, E: Display>(
+        &self,
+        endpoint: E
     ) -> Result<T> {
         let res = self.client.delete(&StripeClient::endpoint(endpoint))
             .headers(self.default_headers())
@@ -1533,11 +1550,12 @@ impl StripeClient {
         }
     }
 
-    fn endpoint(suffix: &str) -> String {
-        if suffix.starts_with("/") {
-            format!("{}{}", BASE_URL, suffix)
+    fn endpoint<E: Display>(endpoint: E) -> String {
+        let endpoint = endpoint.to_string();
+        if endpoint.starts_with("/") {
+            format!("{}{}", BASE_URL, endpoint)
         } else {
-            format!("{}/{}", BASE_URL, suffix)
+            format!("{}/{}", BASE_URL, endpoint)
         }
     }
 

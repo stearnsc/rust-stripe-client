@@ -1,4 +1,5 @@
 use serde;
+use std::fmt;
 use super::api_list::ApiList;
 use super::currency::Currency;
 use super::StripeObject;
@@ -70,6 +71,24 @@ pub enum TransactionType {
     TransferFailure,
     TransferRefund,
     Other(String)
+}
+
+impl fmt::Display for TransactionType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            TransactionType::ApplicationFee       => write!(f, "application_fee"),
+            TransactionType::ApplicationFeeRefund => write!(f, "application_fee_refund"),
+            TransactionType::Charge               => write!(f, "charge"),
+            TransactionType::Payment              => write!(f, "payment"),
+            TransactionType::PaymentRefund        => write!(f, "payment_refund"),
+            TransactionType::Refund               => write!(f, "refund"),
+            TransactionType::Transfer             => write!(f, "transfer"),
+            TransactionType::TransferCancel       => write!(f, "transfer_cancel"),
+            TransactionType::TransferFailure      => write!(f, "transfer_failure"),
+            TransactionType::TransferRefund       => write!(f, "transfer_refund"),
+            TransactionType::Other(ref unknown)   => write!(f, "{}", unknown),
+        }
+    }
 }
 
 impl serde::Deserialize for TransactionType {

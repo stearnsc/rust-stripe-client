@@ -7,6 +7,7 @@ pub struct StripeErrorWrapper {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+/// https://stripe.com/docs/api#errors
 pub struct StripeError {
     #[serde(rename="type")]
     pub kind: StripeErrorKind,
