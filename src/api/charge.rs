@@ -229,7 +229,7 @@ impl<'a> ListChargesRequest<'a> {
     pub fn new(client: &'a StripeClient) -> ListChargesRequest<'a> {
         ListChargesRequest {
             client: client,
-            args: CallArgs::new(),
+            args: CallArgs(vec![("include[]".to_string(), "total_count".to_string())])
         }
     }
 

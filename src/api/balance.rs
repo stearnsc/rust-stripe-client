@@ -57,7 +57,7 @@ impl<'a> ListBalanceHistoryRequest<'a> {
     pub fn new(client: &'a StripeClient) -> Self {
         ListBalanceHistoryRequest {
             client: client,
-            args: CallArgs::new()
+            args: CallArgs(vec![("include[]".to_string(), "total_count".to_string())])
         }
     }
 

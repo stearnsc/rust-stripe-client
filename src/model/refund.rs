@@ -1,5 +1,6 @@
 use serde;
 use std::collections::BTreeMap;
+use std::fmt;
 use super::currency::Currency;
 use super::StripeObject;
 
@@ -30,6 +31,17 @@ pub enum RefundReason {
     Fraudulent,
     RequestedByCustomer,
     Unknown(String)
+}
+
+impl fmt::Display for RefundReason {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            RefundReason::Duplicate           => write!(f, "duplicate"),
+            RefundReason::Fraudulent          => write!(f, "fraudulent"),
+            RefundReason::RequestedByCustomer => write!(f, "requested_by_customer"),
+            RefundReason::Unknown(ref s)      => write!(f, "{}", s),
+        }
+    }
 }
 
 impl serde::Deserialize for RefundReason {

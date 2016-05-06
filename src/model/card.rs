@@ -234,8 +234,8 @@ impl UrlEncodable for NewCard {
         } = *self;
 
         let mut v = vec![
-            ("exp_month".to_string(), exp_month.to_string()),
-            ("exp_year".to_string(), exp_year.to_string()),
+            ("exp_month".to_string(), format!("{:02}", exp_month)),
+            ("exp_year".to_string(), format!("{:02}", exp_year)),
             ("number".to_string(), number.to_string()),
         ];
         if let Some(ref address_city) = *address_city {

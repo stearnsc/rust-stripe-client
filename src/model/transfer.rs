@@ -1,5 +1,6 @@
 use serde;
 use std::collections::BTreeMap;
+use std::fmt;
 use super::api_list::ApiList;
 use super::currency::Currency;
 use super::source_type::SourceType;
@@ -97,6 +98,24 @@ pub enum TransferFailureCode {
     BankAccountRestricted,
     InvalidCurrency,
     Other(String),
+}
+
+impl fmt::Display for TransferFailureCode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            TransferFailureCode::InsufficientFunds     => write!(f, "insufficient_funds"),
+            TransferFailureCode::AccountClosed         => write!(f, "account_closed"),
+            TransferFailureCode::NoAccount             => write!(f, "no_account"),
+            TransferFailureCode::InvalidAccountNumber  => write!(f, "invalid_account_number"),
+            TransferFailureCode::DebitNotAuthorized    => write!(f, "debit_not_authorized"),
+            TransferFailureCode::BankOwnershipChanged  => write!(f, "bank_ownership_changed"),
+            TransferFailureCode::AccountFrozen         => write!(f, "account_frozen"),
+            TransferFailureCode::CouldNotProcess       => write!(f, "could_not_process"),
+            TransferFailureCode::BankAccountRestricted => write!(f, "bank_account_restricted"),
+            TransferFailureCode::InvalidCurrency       => write!(f, "invalid_currency"),
+            TransferFailureCode::Other(ref other)      => write!(f, "{}", other),
+        }
+    }
 }
 
 impl serde::Deserialize for TransferFailureCode {
