@@ -4,6 +4,7 @@ use super::currency::Currency;
 use super::legal_entity::LegalEntity;
 use super::StripeObject;
 use super::verification::Verification;
+use url_encodable::UrlEncodable;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Account {
@@ -62,15 +63,56 @@ impl StripeObject for ExternalAccount {
 #[derive(Clone, Debug, Deserialize)]
 pub struct TosAcceptance {
     date: i64,
-    ip: String,
-    user_agent: String
+    ip: Option<String>,
+    user_agent: Option<String>
+}
+
+impl UrlEncodable for TosAcceptance {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        let TosAcceptance { ref date, ref ip, ref user_agent } = *self;
+        let mut v = vec![("date".to_string(), date.to_string())];
+        if let Some(ref ip) = *ip {
+            v.push(("ip".to_string(), ip.to_string()));
+        }
+        if let Some(ref user_agent) = *user_agent {
+            v.push(("user_agent".to_string(), user_agent.to_string()));
+        }
+        v
+    }
 }
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct TransferSchedule {
-    delay_days: i64,
-    interval: String,
-    monthly_anchor: i64,
-    weekly_anchor: String
+    delay_days: Option<i64>,
+    interval: Option<String>,
+    monthly_anchor: Option<i64>,
+    weekly_anchor: Option<String>
 }
 
+impl UrlEncodable for TransferSchedule {
+    fn key_value_pairs(&self) -> Vec<(String, String)> {
+        let TransferSchedule {
+            ref delay_days, ref interval, ref monthly_anchor, ref weekly_anchor
+        } = *self;
+
+        let mut v = Vec::new();
+
+        if let Some(ref delay_days) = *delay_days {
+            v.push(("delay_days".to_string(), delay_days.to_string()));
+        }
+
+        if let Some(ref interval) = *interval {
+            v.push(("interval".to_string(), interval.to_string()));
+        }
+
+        if let Some(ref monthly_anchor) = *monthly_anchor {
+            v.push(("monthly_anchor".to_string(), monthly_anchor.to_string()));
+        }
+
+        if let Some(ref weekly_anchor) = *weekly_anchor {
+            v.push(("weekly_anchor".to_string(), weekly_anchor.to_string()));
+        }
+
+        v
+    }
+}

@@ -21,8 +21,8 @@ impl UrlEncodable {
     {
         let mut vec = vec![];
         if !list.is_empty() {
-            for t in list {
-                vec.push((format!("{}[]", list_name), t.to_string()));
+            for (i, t) in list.into_iter().enumerate() {
+                vec.push((format!("{}[{}]", list_name, i), t.to_string()));
             }
         } else {
             // Stripe uses 'name[]=' to indicate an empty list
@@ -51,7 +51,7 @@ impl UrlEncodable {
         vec
     }
 
-    pub fn structured_list<T, S>(list_name: S, list: Vec<T>) -> Vec<(String, String)>
+    pub fn structured_list<T, S>(list_name: S, list: &Vec<T>) -> Vec<(String, String)>
         where T: UrlEncodable, S: Display
     {
         let mut vec = vec![];

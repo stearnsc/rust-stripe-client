@@ -1,8 +1,6 @@
 use call_args::CallArgs;
-use model::{ApiList, NewBankAccount, NewCard, Token};
-use std::collections::BTreeMap;
+use model::{NewBankAccount, NewCard, Token};
 use super::ApiCall;
-use time_constraint::TimeConstraint;
 use {Result, StripeClient};
 
 #[derive(Debug)]
@@ -20,7 +18,7 @@ impl<'a> CreateCardTokenRequest<'a> {
     }
 
     pub fn card(mut self, card: NewCard) -> Self {
-        self.args.add_named("card", card);
+        self.args.add_object("card", card);
         self
     }
 
@@ -52,7 +50,7 @@ impl<'a> CreateBankAccountTokenRequest<'a> {
     }
 
     pub fn bank_account(mut self, bank_account: NewBankAccount) -> Self {
-        self.args.add_named("bank_account", bank_account);
+        self.args.add_object("bank_account", bank_account);
         self
     }
 
@@ -64,7 +62,7 @@ impl<'a> CreateBankAccountTokenRequest<'a> {
 
 impl<'a> ApiCall<Token> for CreateBankAccountTokenRequest<'a> {
     fn call(self) -> Result<Token> {
-        self.client.post("/tokens", &args)
+        self.client.post("/tokens", &self.args)
     }
 }
 
@@ -85,7 +83,7 @@ impl<'a> CreatePiiTokenRequest<'a> {
 
 impl<'a> ApiCall<Token> for CreatePiiTokenRequest<'a> {
     fn call(self) -> Result<Token> {
-        self.client.post("/tokens", &args)
+        self.client.post("/tokens", &self.args)
     }
 }
 
@@ -104,8 +102,8 @@ impl<'a> RetrieveTokenRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<OBJECT> for RetrieveTokenRequest<'a> {
-    fn call(self) -> Result<OBJECT> {
+impl<'a> ApiCall<Token> for RetrieveTokenRequest<'a> {
+    fn call(self) -> Result<Token> {
         self.client.get(format!("/tokens/{}", self.token_id), &())
     }
 }

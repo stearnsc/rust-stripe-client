@@ -234,6 +234,7 @@ impl UrlEncodable for NewCard {
         } = *self;
 
         let mut v = vec![
+            ("object".to_string(), "card".to_string()),
             ("exp_month".to_string(), format!("{:02}", exp_month)),
             ("exp_year".to_string(), format!("{:02}", exp_year)),
             ("number".to_string(), number.to_string()),

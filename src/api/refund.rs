@@ -28,7 +28,7 @@ impl<'a> CreateRefundRequest<'a> {
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 
@@ -92,7 +92,7 @@ impl<'a> UpdateRefundRequest<'a> {
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 }

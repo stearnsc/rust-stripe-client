@@ -57,7 +57,7 @@ impl<'a> CreateChargeRequest<'a> {
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 
@@ -67,7 +67,7 @@ impl<'a> CreateChargeRequest<'a> {
     }
 
     pub fn shipping(mut self, shipping: Shipping) -> Self {
-        self.args.add_named("shipping", shipping);
+        self.args.add_object("shipping", shipping);
         self
     }
 
@@ -150,12 +150,12 @@ impl<'a> UpdateChargeRequest<'a> {
     }
 
     pub fn fraud_details(mut self, fraud_details: BTreeMap<String, String>) -> Self {
-        self.args.add_named("fraud_details", fraud_details);
+        self.args.add_object("fraud_details", fraud_details);
         self
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 
@@ -165,7 +165,7 @@ impl<'a> UpdateChargeRequest<'a> {
     }
 
     pub fn shipping(mut self, shipping: Shipping) -> Self {
-        self.args.add_named("shipping", shipping);
+        self.args.add_object("shipping", shipping);
         self
     }
 }
@@ -234,7 +234,7 @@ impl<'a> ListChargesRequest<'a> {
     }
 
     pub fn created(mut self, created: TimeConstraint) -> Self {
-        self.args.add_named("created", created);
+        self.args.add_object("created", created);
         self
     }
 
@@ -254,7 +254,7 @@ impl<'a> ListChargesRequest<'a> {
     }
 
     pub fn source(mut self, source: SourceType) -> Self {
-        self.args.add_named("source", ("object", source.to_string()));
+        self.args.add_object("source", ("object", source.to_string()));
         self
     }
 

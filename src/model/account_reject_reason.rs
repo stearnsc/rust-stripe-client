@@ -1,5 +1,6 @@
 use serde;
 use serde::de::Error;
+use std::fmt;
 
 #[derive(Clone, Debug)]
 pub enum AccountRejectReason {
@@ -21,14 +22,12 @@ impl serde::Deserialize for AccountRejectReason {
     }
 }
 
-impl serde::Serialize for AccountRejectReason {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-        where S: serde::Serializer
-    {
+impl fmt::Display for AccountRejectReason {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            AccountRejectReason::Fraud          => str::serialize("fraud", serializer),
-            AccountRejectReason::TermsOfService => str::serialize("terms_of_service", serializer),
-            AccountRejectReason::Other          => str::serialize("other", serializer),
+            AccountRejectReason::Fraud          => write!(f, "fraud"),
+            AccountRejectReason::TermsOfService => write!(f, "terms_of_service"),
+            AccountRejectReason::Other          => write!(f, "other"),
         }
     }
 }

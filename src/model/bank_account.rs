@@ -140,6 +140,7 @@ impl UrlEncodable for NewBankAccount {
         } = *self;
 
         let mut pairs = vec![
+            ("object".to_string(), "bank_account".to_string()),
             ("account_number".to_string(), account_number.to_string()),
             ("country".to_string(), country.to_string()),
             ("currency".to_string(), currency.to_string())

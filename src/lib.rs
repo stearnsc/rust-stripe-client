@@ -390,50 +390,50 @@ impl StripeClient {
     //     ))
     // }
 
-    /// https://stripe.com/docs/api#create_transfer_reversal
-    pub fn create_transfer_reversal(
-        &self,
-        transfer_id: &str,
-        args: Option<BTreeMap<String, String>>,
-        metadata: Option<BTreeMap<String, String>>,
-    ) -> Result<TransferReversal> {
-        self.post(&format!("/transfers/{}/reversals", transfer_id), &(
-            args,
-            UrlEncodable::named("metadata", &metadata)
-        ))
-    }
+    // /// https://stripe.com/docs/api#create_transfer_reversal
+    // pub fn create_transfer_reversal(
+    //     &self,
+    //     transfer_id: &str,
+    //     args: Option<BTreeMap<String, String>>,
+    //     metadata: Option<BTreeMap<String, String>>,
+    // ) -> Result<TransferReversal> {
+    //     self.post(&format!("/transfers/{}/reversals", transfer_id), &(
+    //         args,
+    //         UrlEncodable::named("metadata", &metadata)
+    //     ))
+    // }
 
-    /// https://stripe.com/docs/api#retrieve_transfer_reversal
-    pub fn retrieve_transfer_reversal(
-        &self,
-        transfer_id: &str,
-        reversal_id: &str,
-    ) -> Result<TransferReversal> {
-        self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), &())
-    }
+    // /// https://stripe.com/docs/api#retrieve_transfer_reversal
+    // pub fn retrieve_transfer_reversal(
+    //     &self,
+    //     transfer_id: &str,
+    //     reversal_id: &str,
+    // ) -> Result<TransferReversal> {
+    //     self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), &())
+    // }
 
-    /// https://stripe.com/docs/api#update_transfer_reversal
-    pub fn update_transfer_reversal(
-        &self,
-        transfer_id: &str,
-        reversal_id: &str,
-        description: Option<String>,
-        metadata: Option<BTreeMap<String, String>>,
-    ) -> Result<TransferReversal> {
-        self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), &(
-            description.map(|d| ("description", d)),
-            UrlEncodable::named("metadata", &metadata)
-        ))
-    }
+    // /// https://stripe.com/docs/api#update_transfer_reversal
+    // pub fn update_transfer_reversal(
+    //     &self,
+    //     transfer_id: &str,
+    //     reversal_id: &str,
+    //     description: Option<String>,
+    //     metadata: Option<BTreeMap<String, String>>,
+    // ) -> Result<TransferReversal> {
+    //     self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), &(
+    //         description.map(|d| ("description", d)),
+    //         UrlEncodable::named("metadata", &metadata)
+    //     ))
+    // }
 
-    /// https://stripe.com/docs/api#list_transfer_reversals
-    pub fn list_transfer_reversals(
-        &self,
-        transfer_id: &str,
-        args: Option<BTreeMap<String, String>>,
-    ) -> Result<ApiList<TransferReversal>> {
-        self.get(&format!("/transfers/{}/reversals", transfer_id), &args)
-    }
+    // /// https://stripe.com/docs/api#list_transfer_reversals
+    // pub fn list_transfer_reversals(
+    //     &self,
+    //     transfer_id: &str,
+    //     args: Option<BTreeMap<String, String>>,
+    // ) -> Result<ApiList<TransferReversal>> {
+    //     self.get(&format!("/transfers/{}/reversals", transfer_id), &args)
+    // }
 
     // /// https://stripe.com/docs/api#retrieve_account
     // /// Fetch account associated with self.key
@@ -1509,6 +1509,22 @@ impl StripeClient {
         let res = self.client.delete(&StripeClient::endpoint(endpoint))
             .headers(self.default_headers())
             .send()?;
+        StripeClient::parse_response(res)
+    }
+
+    pub fn delete_with_args<T: Deserialize, E: Display>(
+        &self,
+        endpoint: E,
+        args: &UrlEncodable
+    ) -> Result<T> {
+        let body = args.encoded_string();
+        let mut req = self.client.delete(&StripeClient::endpoint(endpoint))
+            .headers(self.default_headers());
+
+        if !body.is_empty() {
+            req = req.body(body.as_bytes());
+        }
+        let res = req.send()?;
         StripeClient::parse_response(res)
     }
 

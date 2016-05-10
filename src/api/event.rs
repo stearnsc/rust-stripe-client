@@ -1,6 +1,5 @@
 use call_args::CallArgs;
 use model::{ApiList, Event};
-use std::collections::BTreeMap;
 use super::ApiCall;
 use time_constraint::TimeConstraint;
 use {Result, StripeClient};
@@ -41,7 +40,7 @@ impl<'a> ListEventRequest<'a> {
     }
 
     pub fn created(mut self, created: TimeConstraint) -> Self {
-        self.args.add_named("created", created);
+        self.args.add_object("created", created);
         self
     }
 
@@ -68,6 +67,6 @@ impl<'a> ListEventRequest<'a> {
 
 impl<'a> ApiCall<ApiList<Event>> for ListEventRequest<'a> {
     fn call(self) -> Result<ApiList<Event>> {
-        self.client.get("/events", &args)
+        self.client.get("/events", &self.args)
     }
 }

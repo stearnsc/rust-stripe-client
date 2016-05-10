@@ -2,7 +2,6 @@ use call_args::CallArgs;
 use model::{ApiList, TransferReversal};
 use std::collections::BTreeMap;
 use super::ApiCall;
-use time_constraint::TimeConstraint;
 use {Result, StripeClient};
 
 #[derive(Debug)]
@@ -16,7 +15,7 @@ impl<'a> CreateTransferReveralRequest<'a> {
     pub fn new(client: &'a StripeClient, transfer_id: String) -> CreateTransferReveralRequest<'a> {
         CreateTransferReveralRequest {
             client: client,
-            transfer_id: transfer_id
+            transfer_id: transfer_id,
             args: CallArgs::new()
         }
     }
@@ -32,7 +31,7 @@ impl<'a> CreateTransferReveralRequest<'a> {
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 
@@ -69,8 +68,8 @@ impl<'a> RetrieveTransferReversalRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<OBJECT> for RetrieveTransferReversalRequest<'a> {
-    fn call(self) -> Result<OBJECT> {
+impl<'a> ApiCall<TransferReversal> for RetrieveTransferReversalRequest<'a> {
+    fn call(self) -> Result<TransferReversal> {
         self.client.get(
             format!("/transfers/{}/reversals/{}", self.transfer_id, self.reversal_id),
             &()
@@ -106,7 +105,7 @@ impl<'a> UpdateTransferReversalRequest<'a> {
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 }
@@ -131,7 +130,7 @@ impl<'a> ListTransferReversalsRequest<'a> {
     pub fn new(client: &'a StripeClient, transfer_id: String) -> ListTransferReversalsRequest<'a> {
         ListTransferReversalsRequest {
             client: client,
-            transfer_id: String,
+            transfer_id: transfer_id,
             args: CallArgs::new()
         }
     }
@@ -154,6 +153,6 @@ impl<'a> ListTransferReversalsRequest<'a> {
 
 impl<'a> ApiCall<ApiList<TransferReversal>> for ListTransferReversalsRequest<'a> {
     fn call(self) -> Result<ApiList<TransferReversal>> {
-        self.get(format!("/transfers/{}/reversals", self.transfer_id), &args)
+        self.client.get(format!("/transfers/{}/reversals", self.transfer_id), &self.args)
     }
 }

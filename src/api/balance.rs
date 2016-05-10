@@ -62,12 +62,12 @@ impl<'a> ListBalanceHistoryRequest<'a> {
     }
 
     pub fn available_on(mut self, available_on: TimeConstraint) -> Self {
-        self.args.add_named("available_on", available_on);
+        self.args.add_object("available_on", available_on);
         self
     }
 
     pub fn created(mut self, created: TimeConstraint) -> Self {
-        self.args.add_named("created", created);
+        self.args.add_object("created", created);
         self
     }
 

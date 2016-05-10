@@ -9,6 +9,10 @@ impl CallArgs {
         CallArgs(Vec::new())
     }
 
+    pub fn from<T: UrlEncodable>(t: T) -> Self {
+        CallArgs(t.key_value_pairs())
+    }
+
     pub fn add<T: UrlEncodable>(&mut self, t: T) {
         let CallArgs(ref mut args) = *self;
         args.extend(t.key_value_pairs());
@@ -18,8 +22,12 @@ impl CallArgs {
         self.add((key, value.to_string()));
     }
 
-    pub fn add_named<T: UrlEncodable>(&mut self, name: &str, t: T) {
+    pub fn add_object<T: UrlEncodable>(&mut self, name: &str, t: T) {
         self.add(UrlEncodable::named(name, &t));
+    }
+
+    pub fn add_list<T: Display>(&mut self, name: &str, ts: Vec<T>) {
+        self.add(UrlEncodable::list(name, &ts));
     }
 }
 

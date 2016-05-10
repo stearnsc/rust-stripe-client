@@ -49,6 +49,19 @@ pub enum TransferStatus {
     Other(String)
 }
 
+impl fmt::Display for TransferStatus {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            TransferStatus::Paid             => write!(f, "paid"),
+            TransferStatus::Pending          => write!(f, "pending"),
+            TransferStatus::InTransit        => write!(f, "in_transit"),
+            TransferStatus::Canceled         => write!(f, "canceled"),
+            TransferStatus::Failed           => write!(f, "failed"),
+            TransferStatus::Other(ref other) => write!(f, "{}", other),
+        }
+    }
+}
+
 impl serde::Deserialize for TransferStatus {
     fn deserialize<D>(deserializer: &mut D) -> Result<TransferStatus, D::Error>
         where D: serde::Deserializer

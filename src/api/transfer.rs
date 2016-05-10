@@ -21,8 +21,8 @@ impl<'a> CreateTransferRequest<'a> {
         CreateTransferRequest {
             client: client,
             args: CallArgs(vec![
-                ("amount".to_string(), amount.to_string),
-                ("currency".to_string(), currency.to_string),
+                ("amount".to_string(), amount.to_string()),
+                ("currency".to_string(), currency.to_string()),
                 ("destination".to_string(), destination)
             ])
         }
@@ -34,7 +34,7 @@ impl<'a> CreateTransferRequest<'a> {
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 
@@ -91,7 +91,7 @@ pub struct UpdateTransferRequest<'a> {
 impl<'a> UpdateTransferRequest<'a> {
     pub fn new(client: &'a StripeClient, transfer_id: String) -> UpdateTransferRequest<'a> {
         UpdateTransferRequest {
-            client: client
+            client: client,
             transfer_id: transfer_id,
             args: CallArgs::new()
         }
@@ -103,7 +103,7 @@ impl<'a> UpdateTransferRequest<'a> {
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 }
@@ -123,23 +123,23 @@ pub struct ListTransfersRequest<'a> {
 impl<'a> ListTransfersRequest<'a> {
     pub fn new(client: &'a StripeClient) -> ListTransfersRequest<'a> {
         ListTransfersRequest {
-            client: client
+            client: client,
             args: CallArgs::new()
         }
     }
 
     pub fn created(mut self, created: TimeConstraint) -> Self {
-        self.args.add_named("created", created);
+        self.args.add_object("created", created);
         self
     }
 
     pub fn created_exact(mut self, created: i64) -> Self {
-        self.args.add_named("created", created);
+        self.args.add_arg("created", created);
         self
     }
 
     pub fn date(mut self, date: TimeConstraint) -> Self {
-        self.args.add_arg("date", date);
+        self.args.add_object("date", date);
         self
     }
 

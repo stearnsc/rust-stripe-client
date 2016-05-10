@@ -1,5 +1,5 @@
 use call_args::CallArgs;
-use model::{ApiList, Delete, Dispute};
+use model::{ApiList, Dispute};
 use std::collections::BTreeMap;
 use super::ApiCall;
 use time_constraint::TimeConstraint;
@@ -43,12 +43,12 @@ impl<'a> UpdateDisputeRequest<'a> {
     }
 
     pub fn evidence(mut self, evidence: BTreeMap<String, String>) -> Self {
-        self.args.add_named("evidence", evidence);
+        self.args.add_object("evidence", evidence);
         self
     }
 
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
-        self.args.add_named("metadata", metadata);
+        self.args.add_object("metadata", metadata);
         self
     }
 }
@@ -95,7 +95,7 @@ impl<'a> ListDisputesRequest<'a> {
     }
 
     pub fn created(mut self, created: TimeConstraint) -> Self {
-        self.args.add_named("created", created);
+        self.args.add_object("created", created);
         self
     }
 
