@@ -4,14 +4,14 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateCardTokenRequest<'a> {
+pub struct CreateCardTokenCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateCardTokenRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> CreateCardTokenRequest<'a> {
-        CreateCardTokenRequest {
+impl<'a> CreateCardTokenCall<'a> {
+    pub fn new(client: &'a StripeClient) -> CreateCardTokenCall<'a> {
+        CreateCardTokenCall {
             client: client,
             args: CallArgs::new()
         }
@@ -29,21 +29,21 @@ impl<'a> CreateCardTokenRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Token> for CreateCardTokenRequest<'a> {
+impl<'a> ApiCall<Token> for CreateCardTokenCall<'a> {
     fn call(self) -> Result<Token> {
         self.client.post("/tokens", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct CreateBankAccountTokenRequest<'a> {
+pub struct CreateBankAccountTokenCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateBankAccountTokenRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> CreateBankAccountTokenRequest<'a> {
-        CreateBankAccountTokenRequest {
+impl<'a> CreateBankAccountTokenCall<'a> {
+    pub fn new(client: &'a StripeClient) -> CreateBankAccountTokenCall<'a> {
+        CreateBankAccountTokenCall {
             client: client,
             args: CallArgs::new()
         }
@@ -60,49 +60,49 @@ impl<'a> CreateBankAccountTokenRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Token> for CreateBankAccountTokenRequest<'a> {
+impl<'a> ApiCall<Token> for CreateBankAccountTokenCall<'a> {
     fn call(self) -> Result<Token> {
         self.client.post("/tokens", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct CreatePiiTokenRequest<'a> {
+pub struct CreatePiiTokenCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreatePiiTokenRequest<'a> {
-    pub fn new(client: &'a StripeClient, personal_id_number: String) -> CreatePiiTokenRequest<'a> {
-        CreatePiiTokenRequest {
+impl<'a> CreatePiiTokenCall<'a> {
+    pub fn new(client: &'a StripeClient, personal_id_number: String) -> CreatePiiTokenCall<'a> {
+        CreatePiiTokenCall {
             client: client,
-            args: CallArgs(vec![("pii[personal_id_number]".to_string(), personal_id_number)]),
+            args: CallArgs::from(("pii[personal_id_number]", personal_id_number)),
         }
     }
 }
 
-impl<'a> ApiCall<Token> for CreatePiiTokenRequest<'a> {
+impl<'a> ApiCall<Token> for CreatePiiTokenCall<'a> {
     fn call(self) -> Result<Token> {
         self.client.post("/tokens", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveTokenRequest<'a> {
+pub struct RetrieveTokenCall<'a> {
     client: &'a StripeClient,
     token_id: String
 }
 
-impl<'a> RetrieveTokenRequest<'a> {
-    pub fn new(client: &'a StripeClient, token_id: String) -> RetrieveTokenRequest<'a> {
-        RetrieveTokenRequest {
+impl<'a> RetrieveTokenCall<'a> {
+    pub fn new(client: &'a StripeClient, token_id: String) -> RetrieveTokenCall<'a> {
+        RetrieveTokenCall {
             client: client,
             token_id: token_id
         }
     }
 }
 
-impl<'a> ApiCall<Token> for RetrieveTokenRequest<'a> {
+impl<'a> ApiCall<Token> for RetrieveTokenCall<'a> {
     fn call(self) -> Result<Token> {
         self.client.get(format!("/tokens/{}", self.token_id), &())
     }

@@ -5,15 +5,15 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateTransferReveralRequest<'a> {
+pub struct CreateTransferReversalCall<'a> {
     client: &'a StripeClient,
     transfer_id: String,
     args: CallArgs
 }
 
-impl<'a> CreateTransferReveralRequest<'a> {
-    pub fn new(client: &'a StripeClient, transfer_id: String) -> CreateTransferReveralRequest<'a> {
-        CreateTransferReveralRequest {
+impl<'a> CreateTransferReversalCall<'a> {
+    pub fn new(client: &'a StripeClient, transfer_id: String) -> CreateTransferReversalCall<'a> {
+        CreateTransferReversalCall {
             client: client,
             transfer_id: transfer_id,
             args: CallArgs::new()
@@ -41,26 +41,26 @@ impl<'a> CreateTransferReveralRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<TransferReversal> for CreateTransferReveralRequest<'a> {
+impl<'a> ApiCall<TransferReversal> for CreateTransferReversalCall<'a> {
     fn call(self) -> Result<TransferReversal> {
         self.client.post(format!("/transfers/{}/reversals", self.transfer_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveTransferReversalRequest<'a> {
+pub struct RetrieveTransferReversalCall<'a> {
     client: &'a StripeClient,
     transfer_id: String,
     reversal_id: String,
 }
 
-impl<'a> RetrieveTransferReversalRequest<'a> {
+impl<'a> RetrieveTransferReversalCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         transfer_id: String,
         reversal_id: String
-    ) -> RetrieveTransferReversalRequest<'a> {
-        RetrieveTransferReversalRequest {
+    ) -> RetrieveTransferReversalCall<'a> {
+        RetrieveTransferReversalCall {
             client: client,
             transfer_id: transfer_id,
             reversal_id: reversal_id
@@ -68,7 +68,7 @@ impl<'a> RetrieveTransferReversalRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<TransferReversal> for RetrieveTransferReversalRequest<'a> {
+impl<'a> ApiCall<TransferReversal> for RetrieveTransferReversalCall<'a> {
     fn call(self) -> Result<TransferReversal> {
         self.client.get(
             format!("/transfers/{}/reversals/{}", self.transfer_id, self.reversal_id),
@@ -78,20 +78,20 @@ impl<'a> ApiCall<TransferReversal> for RetrieveTransferReversalRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct UpdateTransferReversalRequest<'a> {
+pub struct UpdateTransferReversalCall<'a> {
     client: &'a StripeClient,
     transfer_id: String,
     reversal_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateTransferReversalRequest<'a> {
+impl<'a> UpdateTransferReversalCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         transfer_id: String,
         reversal_id: String
-    ) -> UpdateTransferReversalRequest<'a> {
-        UpdateTransferReversalRequest {
+    ) -> UpdateTransferReversalCall<'a> {
+        UpdateTransferReversalCall {
             client: client,
             transfer_id: transfer_id,
             reversal_id: reversal_id,
@@ -110,7 +110,7 @@ impl<'a> UpdateTransferReversalRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<TransferReversal> for UpdateTransferReversalRequest<'a> {
+impl<'a> ApiCall<TransferReversal> for UpdateTransferReversalCall<'a> {
     fn call(self) -> Result<TransferReversal> {
         self.client.post(
             format!("/transfers/{}/reversals/{}", self.transfer_id, self.reversal_id),
@@ -120,15 +120,15 @@ impl<'a> ApiCall<TransferReversal> for UpdateTransferReversalRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct ListTransferReversalsRequest<'a> {
+pub struct ListTransferReversalsCall<'a> {
     client: &'a StripeClient,
     transfer_id: String,
     args: CallArgs
 }
 
-impl<'a> ListTransferReversalsRequest<'a> {
-    pub fn new(client: &'a StripeClient, transfer_id: String) -> ListTransferReversalsRequest<'a> {
-        ListTransferReversalsRequest {
+impl<'a> ListTransferReversalsCall<'a> {
+    pub fn new(client: &'a StripeClient, transfer_id: String) -> ListTransferReversalsCall<'a> {
+        ListTransferReversalsCall {
             client: client,
             transfer_id: transfer_id,
             args: CallArgs::new()
@@ -151,7 +151,7 @@ impl<'a> ListTransferReversalsRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<TransferReversal>> for ListTransferReversalsRequest<'a> {
+impl<'a> ApiCall<ApiList<TransferReversal>> for ListTransferReversalsCall<'a> {
     fn call(self) -> Result<ApiList<TransferReversal>> {
         self.client.get(format!("/transfers/{}/reversals", self.transfer_id), &self.args)
     }

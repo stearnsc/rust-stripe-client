@@ -5,35 +5,35 @@ use time_constraint::TimeConstraint;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct RetrieveApplicationFeeRequest<'a> {
+pub struct RetrieveApplicationFeeCall<'a> {
     client: &'a StripeClient,
     fee_id: String
 }
 
-impl<'a> RetrieveApplicationFeeRequest<'a> {
-    pub fn new(client: &'a StripeClient, fee_id: String) -> RetrieveApplicationFeeRequest<'a> {
-        RetrieveApplicationFeeRequest {
+impl<'a> RetrieveApplicationFeeCall<'a> {
+    pub fn new(client: &'a StripeClient, fee_id: String) -> RetrieveApplicationFeeCall<'a> {
+        RetrieveApplicationFeeCall {
             client: client,
             fee_id: fee_id
         }
     }
 }
 
-impl<'a> ApiCall<ApplicationFee> for RetrieveApplicationFeeRequest<'a> {
+impl<'a> ApiCall<ApplicationFee> for RetrieveApplicationFeeCall<'a> {
     fn call(self) -> Result<ApplicationFee> {
         self.client.get(format!("/application_fees/{}", self.fee_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct ListApplicationFeesRequest<'a> {
+pub struct ListApplicationFeesCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListApplicationFeesRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListApplicationFeesRequest<'a> {
-        ListApplicationFeesRequest {
+impl<'a> ListApplicationFeesCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListApplicationFeesCall<'a> {
+        ListApplicationFeesCall {
             client: client,
             args: CallArgs::new()
         }
@@ -70,7 +70,7 @@ impl<'a> ListApplicationFeesRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<ApplicationFee>> for ListApplicationFeesRequest<'a> {
+impl<'a> ApiCall<ApiList<ApplicationFee>> for ListApplicationFeesCall<'a> {
     fn call(self) -> Result<ApiList<ApplicationFee>> {
         self.client.get("/application_fees", &self.args)
     }

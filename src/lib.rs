@@ -30,11 +30,10 @@ mod time_constraint;
 pub use either::Either;
 pub use time_constraint::TimeConstraint;
 
-use either::Either::{Left, Right};
+use api::*;
 use errors::error::Error;
 use errors::stripe_error;
 use model::*;
-use idempotency_header::IdempotencyKey;
 use stripe_version_header::StripeVersion;
 use url_encodable::UrlEncodable;
 
@@ -60,1398 +59,747 @@ impl StripeClient {
         }
     }
 
-    // /// https://stripe.com/docs/api#retrieve_balance
-    // pub fn retrieve_balance(&self) -> Result<Balance> {
-    //     self.get("/balance", &())
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_balance_transaction
-    // pub fn retrieve_balance_transaction(
-    //     &self,
-    //     balance_transaction_id: &str
-    // ) -> Result<BalanceTransaction> {
-    //     self.get(&format!("/balance/history/{}", balance_transaction_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#balance_history
-    // pub fn list_balance_history(
-    //     &self,
-    //     args: BTreeMap<String, String>
-    // ) -> Result<ApiList<BalanceTransaction>> {
-    //     self.get("/balance/history", &args)
-    // }
-
-    // /// https://stripe.com/docs/api#create_charge
-    // pub fn create_charge(
-    //     &self,
-    //     args: BTreeMap<String, String>,
-    //     idempotency_key: Option<&str>
-    // ) -> Result<Charge> {
-    //     let url = StripeClient::endpoint("/charges");
-    //     let body = args.encoded_string();
-    //     let mut req_builder = self.client.post(&url)
-    //         .headers(self.default_headers())
-    //         .body(body.as_bytes());
-
-    //     if let Some(idempotency_key) = idempotency_key {
-    //         req_builder = req_builder.header(IdempotencyKey::new(idempotency_key));
-    //     }
-
-    //     let res = req_builder.send()?;
-
-    //     StripeClient::parse_response::<Charge>(res)
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_charge
-    // pub fn retrieve_charge(
-    //     &self,
-    //     charge_id: &str
-    // ) -> Result<Charge> {
-    //     self.get(&format!("/charges/{}", charge_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_charge
-    // pub fn update_charge(
-    //     &self,
-    //     charge_id: &str,
-    //     args: BTreeMap<String, String>
-    // ) -> Result<Charge> {
-    //     self.post(&format!("/charges/{}", charge_id), &args)
-    // }
-
-    // /// https://stripe.com/docs/api#capture_charge
-    // pub fn capture_charge(
-    //     &self,
-    //     charge_id: &str,
-    //     args: BTreeMap<String, String>
-    // ) -> Result<Charge> {
-    //     self.post(&format!("/charges/{}", charge_id), &args)
-    // }
-
-    // /// https://stripe.com/docs/api#list_charges
-    // pub fn list_charges(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>,
-    //     created_constraint: Option<TimeConstraint>,
-    //     source_type: Option<SourceType>,
-    // ) -> Result<ApiList<Charge>> {
-    //     let source_type = match source_type {
-    //         Some(st) => Some(("source[object]", st.to_string())),
-    //         None => None,
-    //     };
-    //     self.get("/charges", &(
-    //         ("include[]", "total_count"),
-    //         args,
-    //         UrlEncodable::named("created", &created_constraint),
-    //         source_type
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_customer
-    // pub fn create_customer(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    //     shipping: Option<Shipping>,
-    //     card_token_or_args: Option<Either<String, BTreeMap<String, String>>>
-    // ) -> Result<Customer> {
-    //     self.post("/customers", &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata),
-    //         UrlEncodable::named("shipping", &shipping),
-    //         card_token_or_args.map(|c| token_or_args("source", c))
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_customer
-    // pub fn retrieve_customer(&self, customer_id: &str) -> Result<Customer> {
-    //     self.get(&format!("/customers/{}", customer_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_customer
-    // pub fn update_customer(
-    //     &self,
-    //     customer_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    //     shipping: Option<Shipping>,
-    //     card_token_or_args: Option<Either<String, BTreeMap<String, String>>>
-    // ) -> Result<Customer> {
-    //     self.post(&format!("/customers/{}", customer_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata),
-    //         UrlEncodable::named("shipping", &shipping),
-    //         card_token_or_args.map(|ct| token_or_args("source", ct))
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_customer
-    // pub fn delete_customer(&self, customer_id: &str) -> Result<Delete> {
-    //     self.delete(&format!("/customers/{}", customer_id))
-    // }
-
-    // /// https://stripe.com/docs/api#list_customers
-    // pub fn list_customers(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>,
-    //     created_constraint: Option<TimeConstraint>,
-    // ) -> Result<ApiList<Customer>> {
-    //     self.get("/customers", &(
-    //         ("include[]", "total_count"),
-    //         args,
-    //         UrlEncodable::named("created", &created_constraint)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_dispute
-    // pub fn retrieve_dispute(
-    //     &self,
-    //     dispute_id: &str
-    // ) -> Result<Dispute> {
-    //     self.get(&format!("/disputes/{}", dispute_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_dispute
-    // pub fn update_dispute(
-    //     &self,
-    //     dispute_id: &str,
-    //     evidence: BTreeMap<String, String>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<Dispute> {
-    //     self.post(&format!("/disputes/{}", dispute_id), &(
-    //         UrlEncodable::named("evidence", &evidence),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#close_dispute
-    // pub fn close_dispute(
-    //     &self,
-    //     dispute_id: &str
-    // ) -> Result<Dispute> {
-    //     self.post(&format!("/disputes/{}/close", dispute_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#list_disputes
-    // pub fn list_disputes(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>,
-    //     created_constraint: Option<TimeConstraint>,
-    // ) -> Result<ApiList<Dispute>> {
-    //     self.get("/disputes", &(
-    //         args,
-    //         UrlEncodable::named("created", &created_constraint)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_event
-    // pub fn retrieve_event(&self, event_id: &str) -> Result<Event> {
-    //     self.get(&format!("/events/{}", event_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#list_events
-    // pub fn list_events(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>,
-    //     created_constraint: Option<TimeConstraint>,
-    // ) -> Result<ApiList<Event>> {
-    //     self.get("/events", &(
-    //         ("include[]", "total_count"),
-    //         args,
-    //         UrlEncodable::named("created", &created_constraint)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_refund
-    // pub fn create_refund(
-    //     &self,
-    //     charge_id: &str,
-    //     args: BTreeMap<String, String>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Refund> {
-    //     self.post("/refunds", &(
-    //         ("charge", charge_id),
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_refund
-    // pub fn retrieve_refund(
-    //     &self,
-    //     refund_id: &str
-    // ) -> Result<Refund> {
-    //     self.get(&format!("/refunds/{}", refund_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_refund
-    // pub fn update_refund(
-    //     &self,
-    //     refund_id: &str,
-    //     update: BTreeMap<String, String>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Refund> {
-    //     self.post(&format!("/refunds/{}", refund_id), &(
-    //         update,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#list_refunds
-    // pub fn list_refunds(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Refund>> {
-    //     self.get("/refunds", &args)
-    // }
-
-    // /// https://stripe.com/docs/api#create_card_token
-    // pub fn create_card_token(
-    //     &self,
-    //     card_args: BTreeMap<String, String>,
-    //     customer_id: Option<String>
-    // ) -> Result<Token> {
-    //     self.post("/tokens", &(
-    //         UrlEncodable::named("card", &card_args),
-    //         customer_id.map(|id| ("customer", id))
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_bank_account_token
-    // pub fn create_bank_account_token(
-    //     &self,
-    //     bank_account_args: BTreeMap<String, String>,
-    //     customer_id: Option<String>,
-    // ) -> Result<Token> {
-    //     self.post("/tokens", &(
-    //         UrlEncodable::named("bank_account", &bank_account_args),
-    //         customer_id.map(|id| ("customer", id))
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_pii_token
-    // pub fn create_pii_token(
-    //     &self,
-    //     pii: Option<String>
-    // ) -> Result<Token> {
-    //     self.post("/tokens",
-    //         &pii.map(|pii| ("pii[personal_id_number]", pii))
-    //     )
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_token
-    // pub fn retrieve_token(
-    //     &self,
-    //     token_id: &str
-    // ) -> Result<Token> {
-    //     self.get(&format!("/tokens/{}", token_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#create_transfer
-    // pub fn create_transfer(
-    //     &self,
-    //     transfer_args: BTreeMap<String, String>
-    // ) -> Result<Transfer> {
-    //     self.post("/transfers", &transfer_args)
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_transfer
-    // pub fn retrieve_transfer(
-    //     &self,
-    //     transfer_id: &str
-    // ) -> Result<Transfer> {
-    //     self.get(&format!("/transfers/{}", transfer_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_transfer
-    // pub fn update_transfer(
-    //     &self,
-    //     transfer_id: &str,
-    //     description: Option<String>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<Transfer> {
-    //     self.post(&format!("/transfers/{}", transfer_id), &(
-    //         description.map(|d| ("description", d)),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#list_transfers
-    // pub fn list_transfers(
-    //     &self,
-    //     created_constraint: Option<TimeConstraint>,
-    //     date_constraint: Option<TimeConstraint>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Transfer>> {
-    //     self.get("/transfers", &(
-    //         args,
-    //         UrlEncodable::named("created", &created_constraint),
-    //         UrlEncodable::named("date", &date_constraint)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_transfer_reversal
-    // pub fn create_transfer_reversal(
-    //     &self,
-    //     transfer_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<TransferReversal> {
-    //     self.post(&format!("/transfers/{}/reversals", transfer_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_transfer_reversal
-    // pub fn retrieve_transfer_reversal(
-    //     &self,
-    //     transfer_id: &str,
-    //     reversal_id: &str,
-    // ) -> Result<TransferReversal> {
-    //     self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_transfer_reversal
-    // pub fn update_transfer_reversal(
-    //     &self,
-    //     transfer_id: &str,
-    //     reversal_id: &str,
-    //     description: Option<String>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<TransferReversal> {
-    //     self.get(&format!("/transfers/{}/reversals/{}", transfer_id, reversal_id), &(
-    //         description.map(|d| ("description", d)),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#list_transfer_reversals
-    // pub fn list_transfer_reversals(
-    //     &self,
-    //     transfer_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    // ) -> Result<ApiList<TransferReversal>> {
-    //     self.get(&format!("/transfers/{}/reversals", transfer_id), &args)
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_account
-    // /// Fetch account associated with self.key
-    // pub fn retrieve_current_account(&self) -> Result<Account> {
-    //     self.get("/account", &())
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_account
-    // pub fn retrieve_account(
-    //     &self,
-    //     account_id: &str
-    // ) -> Result<Account> {
-    //     self.get(&format!("/accounts/{}", account_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#create_account
-    // pub fn create_account(
-    //     &self,
-    //     args: BTreeMap<String, String>
-    // ) -> Result<Account> {
-    //     self.post("/accounts", &args)
-    // }
-
-    // /// https://stripe.com/docs/api#update_account
-    // pub fn update_account(
-    //     &self,
-    //     account_id: &str,
-    //     args: BTreeMap<String, String>
-    // ) -> Result<Account> {
-    //     self.post(&format!("/accounts/{}", account_id), &args)
-    // }
-
-    // /// https://stripe.com/docs/api#delete_account
-    // pub fn delete_account(
-    //     &self,
-    //     account_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/accounts/{}", account_id))
-    // }
-
-    // /// https://stripe.com/docs/api#reject_account
-    // pub fn reject_account(
-    //     &self,
-    //     account_id: &str,
-    //     reason: AccountRejectReason
-    // ) -> Result<Account> {
-    //     self.post(&format!("/accounts/{}/reject", account_id),
-    //         &("reason", serde_json::to_string(&reason)?)
-    //     )
-    // }
-
-    // /// https://stripe.com/docs/api#list_accounts
-    // pub fn list_accounts(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Account>> {
-    //     self.get("/accounts", &args)
-    // }
-
-    // /// https://stripe.com/docs/api#create_fee_refund
-    // pub fn create_fee_refund(
-    //     &self,
-    //     fee_id: &str,
-    //     amount: Option<i64>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<FeeRefund> {
-    //     self.post(&format!("/application_fees/{}/refunds", fee_id), &(
-    //         amount.map(|a| ("amount", a.to_string())),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_fee_refund
-    // pub fn retrieve_fee_refund(
-    //     &self,
-    //     fee_id: &str,
-    //     refund_id: &str
-    // ) -> Result<FeeRefund> {
-    //     self.get(&format!("/application_fees/{}/refunds/{}", fee_id, refund_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_fee_refund
-    // pub fn update_fee_refund(
-    //     &self,
-    //     fee_id: &str,
-    //     refund_id: &str,
-    //     metadata: BTreeMap<String, String>
-    // ) -> Result<FeeRefund> {
-    //     self.post(&format!("/application_fees/{}/refunds/{}", fee_id, refund_id),
-    //         &UrlEncodable::named("metadata", &metadata)
-    //     )
-    // }
-
-    // /// https://stripe.com/docs/api#list_fee_refunds
-    // pub fn list_fee_refunds(
-    //     &self,
-    //     fee_id: &str,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<FeeRefund>> {
-    //     self.get(&format!("/application_fees/{}/refunds", fee_id), &args)
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_application_fee
-    // pub fn retrieve_application_fee(&self, fee_id: &str) -> Result<ApplicationFee> {
-    //     self.get(&format!("/application_fees/{}", fee_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#list_application_fees
-    // pub fn list_application_fees(
-    //     &self,
-    //     created_constraint: Option<TimeConstraint>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<ApplicationFee>> {
-    //     self.get("/application_fees", &(
-    //         ("include[]", "total_count"),
-    //         UrlEncodable::named("created", &created_constraint),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_recipient
-    // pub fn create_recipient(
-    //     &self,
-    //     args: BTreeMap<String, String>,
-    //     bank_account_token_or_args: Option<Either<String, BTreeMap<String, String>>>,
-    //     card_token_or_args: Option<Either<String, BTreeMap<String, String>>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<Recipient> {
-    //     self.post("/recipients", &(
-    //         args,
-    //         bank_account_token_or_args.map(|b| token_or_args("bank_account", b)),
-    //         card_token_or_args.map(|c| token_or_args("card", c)),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_recipient
-    // pub fn retrieve_recipient(
-    //     &self,
-    //     recipient_id: &str
-    // ) -> Result<Recipient> {
-    //     self.get(&format!("/recipients/{}", recipient_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_recipient
-    // pub fn update_recipient(
-    //     &self,
-    //     recipient_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     bank_account_token_or_args: Option<Either<String, BTreeMap<String, String>>>,
-    //     card_token_or_args: Option<Either<String, BTreeMap<String, String>>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<Recipient> {
-    //     self.post(&format!("/recipients/{}", recipient_id), &(
-    //         args,
-    //         bank_account_token_or_args.map(|b| token_or_args("bank_account", b)),
-    //         card_token_or_args.map(|c| token_or_args("card", c)),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_recipient
-    // pub fn delete_recipient(
-    //     &self,
-    //     recipient_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/recipients/{}", recipient_id))
-    // }
-
-    // /// https://stripe.com/docs/api#list_recipients
-    // pub fn list_recipients(
-    //     &self,
-    //     created_constraint: Option<TimeConstraint>,
-    //     args: Option<BTreeMap<String, String>>,
-    // ) -> Result<ApiList<Recipient>> {
-    //     self.get("/recipients", &(
-    //         ("include[]", "total_count"),
-    //         args,
-    //         UrlEncodable::named("created", &created_constraint)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#list_country_specs
-    // pub fn list_country_specs(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<CountrySpec>> {
-    //     self.get("/country_specs", &args)
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_country_spec
-    // pub fn retrieve_country_spec(
-    //     &self,
-    //     country_id: &str
-    // ) -> Result<CountrySpec> {
-    //     self.get(&format!("/country_specs/{}", country_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#account_create_bank_account
-    // pub fn account_create_bank_account(
-    //     &self,
-    //     account_id: &str,
-    //     bank_account_token_or_args: Either<String, BTreeMap<String, String>>,
-    //     default_for_currency: bool,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<BankAccount> {
-    //     self.post(&format!("/accounts/{}/external_accounts", account_id), &(
-    //         token_or_args("external_account", bank_account_token_or_args),
-    //         ("default_for_currency", default_for_currency.to_string()),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#account_retrieve_bank_account
-    // pub fn account_retrieve_bank_account(
-    //     &self,
-    //     account_id: &str,
-    //     bank_account_id: &str
-    // ) -> Result<BankAccount> {
-    //     self.get(
-    //         &format!("/accounts/{}/external_accounts/{}", account_id, bank_account_id),
-    //         &()
-    //     )
-    // }
-
-    // /// https://stripe.com/docs/api#account_update_bank_account
-    // pub fn account_update_bank_account(
-    //     &self,
-    //     account_id: &str,
-    //     bank_account_id: &str,
-    //     args: BTreeMap<String, String>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<BankAccount> {
-    //     self.post(&format!("/accounts/{}/external_accounts/{}", account_id, bank_account_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#account_delete_bank_account
-    // pub fn account_delete_bank_account(
-    //     &self,
-    //     account_id: &str,
-    //     bank_account_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/accounts/{}/external_accounts/{}", account_id, bank_account_id))
-    // }
-
-    // /// https://stripe.com/docs/api#account_list_bank_accounts
-    // pub fn account_list_bank_accounts(
-    //     &self,
-    //     account_id: &str,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<BankAccount>> {
-    //     self.get(&format!("/accounts/{}/external_accounts", account_id), &args)
-    // }
-
-    // /// https://stripe.com/docs/api#account_create_card
-    // pub fn account_create_card(
-    //     &self,
-    //     account_id: &str,
-    //     card_token_or_args: Either<String, BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    //     default_for_currency: bool
-    // ) -> Result<Card> {
-    //     self.post(&format!("/accounts/{}/external_accounts", account_id), &(
-    //         token_or_args("external_account", card_token_or_args),
-    //         UrlEncodable::named("metadata", &metadata),
-    //         ("default_for_currency", default_for_currency.to_string())
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#account_retrieve_card
-    // pub fn account_retrieve_card(
-    //     &self,
-    //     account_id: &str,
-    //     card_id: &str
-    // ) -> Result<Card> {
-    //     self.get(&format!("/accounts/{}/cards/{}", account_id, card_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#account_update_card
-    // pub fn account_update_card(
-    //     &self,
-    //     account_id: &str,
-    //     card_id: &str,
-    //     args: BTreeMap<String, String>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Card> {
-    //     self.post(&format!("accounts/{}/external_accounts/{}", account_id, card_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#account_delete_card
-    // pub fn account_delete_card(
-    //     &self,
-    //     account_id: &str,
-    //     card_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("accounts/{}/external_accounts/{}", account_id, card_id))
-    // }
-
-    // /// https://stripe.com/docs/api#account_list_cards
-    // pub fn account_list_cards(
-    //     &self,
-    //     account_id: &str,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Card>> {
-    //     self.get(&format!("accounts/{}/external_accounts", account_id), &(
-    //         ("include[]", "total_count"),
-    //         ("object", "card"),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#customer_create_bank_account
-    // pub fn customer_create_bank_account(
-    //     &self,
-    //     customer_id: &str,
-    //     bank_account_token_or_args: Either<String, BTreeMap<String, String>>,
-    //     default_for_currency: bool,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<BankAccount> {
-    //     self.post(&format!("/customers/{}/sources", customer_id), &(
-    //         token_or_args("source", bank_account_token_or_args),
-    //         ("default_for_currency", default_for_currency.to_string()),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#customer_retrieve_bank_account
-    // pub fn customer_retrieve_bank_account(
-    //     &self,
-    //     customer_id: &str,
-    //     bank_account_id: &str
-    // ) -> Result<BankAccount> {
-    //     self.get(&format!("/customers/{}/sources/{}", customer_id, bank_account_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#customer_update_bank_account
-    // pub fn customer_update_bank_account(
-    //     &self,
-    //     customer_id: &str,
-    //     bank_account_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<BankAccount> {
-    //     self.post(&format!("/customers/{}/sources/{}", customer_id, bank_account_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#customer_delete_bank_account
-    // pub fn customer_delete_bank_account(
-    //     &self,
-    //     customer_id: &str,
-    //     bank_account_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/customers/{}/sources/{}", customer_id, bank_account_id))
-    // }
-
-    // /// https://stripe.com/docs/api#customer_list_bank_accounts
-    // pub fn customer_list_bank_accounts(
-    //     &self,
-    //     customer_id: &str,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<BankAccount>> {
-    //     self.get(&format!("/customers/{}/sources", customer_id), &(
-    //         ("include[]", "total_count"),
-    //         ("object", "card"),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_bitcoin_receiver
-    // pub fn create_bitcoin_receiver(
-    //     &self,
-    //     args: BTreeMap<String, String>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<BitcoinReceiver> {
-    //     self.post("/bitcoin/receivers", &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_bitcoin_receiver
-    // pub fn retrieve_bitcoin_receiver(
-    //     &self,
-    //     receiver_id: &str
-    // ) -> Result<BitcoinReceiver> {
-    //     self.get(&format!("/bitcoin/receivers/{}", receiver_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#list_bitcoin_receivers
-    // pub fn list_bitcoin_receivers(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>,
-    // ) -> Result<ApiList<BitcoinReceiver>> {
-    //     self.get("/bitcoin/receivers", &(
-    //         args,
-    //         ("include[]", "total_count")
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_card
-    // pub fn create_card(
-    //     &self,
-    //     customer_id: &str,
-    //     card_token_or_args: Either<String, BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<Card> {
-    //     self.post(&format!("/customers/{}/sources", customer_id), &(
-    //         token_or_args("source", card_token_or_args),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_card
-    // pub fn retrieve_card(
-    //     &self,
-    //     customer_id: &str,
-    //     card_id: &str
-    // ) -> Result<Card> {
-    //     self.get(&format!("/customers/{}/sources/{}", customer_id, card_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_card
-    // pub fn update_card(
-    //     &self,
-    //     customer_id: &str,
-    //     card_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Card> {
-    //     self.post(&format!("/customers/{}/sources/{}", customer_id, card_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_card
-    // pub fn delete_card(
-    //     &self,
-    //     customer_id: &str,
-    //     card_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/customers/{}/sources/{}", customer_id, card_id))
-    // }
-
-    // /// https://stripe.com/docs/api#list_cards
-    // pub fn list_cards(
-    //     &self,
-    //     customer_id: &str,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Card>> {
-    //     self.get(
-    //         &format!("/customers/{}/sources", customer_id),
-    //         &(args, ("include[]", "total_count"))
-    //     )
-    // }
-
-    // /// https://stripe.com/docs/api#create_order
-    // pub fn create_order(
-    //     &self,
-    //     args: BTreeMap<String, String>,
-    //     items: Option<Vec<OrderItem>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    //     shipping: Option<Shipping>
-    // ) -> Result<Order> {
-    //     self.post("/orders", &(
-    //         args,
-    //         items.map(|items| UrlEncodable::structured_list("items", items)),
-    //         UrlEncodable::named("metadata", &metadata),
-    //         UrlEncodable::named("shipping", &shipping),
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_order
-    // pub fn retrieve_order(
-    //     &self,
-    //     order_id: &str
-    // ) -> Result<Order> {
-    //     self.get(&format!("/orders/{}", order_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_order
-    // pub fn update_order(
-    //     &self,
-    //     order_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Order> {
-    //     self.post(&format!("/orders/{}", order_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#pay_order
-    // pub fn pay_order(
-    //     &self,
-    //     order_id: &str,
-    //     customer: Option<String>,
-    //     source: Option<Either<String, BTreeMap<String, String>>>,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Order> {
-    //     self.post(&format!("/orders/{}/pay", order_id), &(
-    //         customer.map(|customer| ("customer", customer)),
-    //         source.map(|source| token_or_args("source", source)),
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#list_orders
-    // pub fn list_orders(
-    //     &self,
-    //     created_constraint: Option<TimeConstraint>,
-    //     ids: Option<Vec<String>>,
-    //     args: Option<BTreeMap<String, String>>,
-    //     status_transitions: Option<BTreeMap<OrderStatus, TimeConstraint>>
-    // ) -> Result<ApiList<Order>> {
-    //     self.get("/orders", &(
-    //         ("include[]", "total_count"),
-    //         UrlEncodable::named("created", &created_constraint),
-    //         ids.map(|ids| UrlEncodable::list("ids", &ids)),
-    //         args,
-    //         status_transitions.map(|st| {
-    //             UrlEncodable::named("status_transitions", &UrlEncodable::structured(&st))
-    //         })
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_product
-    // pub fn create_product(
-    //     &self,
-    //     name: String,
-    //     attributes: Option<Vec<String>>,
-    //     deactivate_on: Option<Vec<String>>,
-    //     images: Option<Vec<String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    //     dimensions: Option<Dimensions>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<Product> {
-    //     self.post("/products", &(
-    //         ("name", name),
-    //         attributes.map(|a| UrlEncodable::list("attributes", &a)),
-    //         deactivate_on.map(|d| UrlEncodable::list("deactivate_on", &d)),
-    //         images.map(|i| UrlEncodable::list("images", &i)),
-    //         UrlEncodable::named("package_dimensions", &dimensions),
-    //         UrlEncodable::named("metadata", &metadata),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_product
-    // pub fn retrieve_product(
-    //     &self,
-    //     product_id: &str
-    // ) -> Result<Product> {
-    //     self.get(&format!("/products/{}", product_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_product
-    // pub fn update_product(
-    //     &self,
-    //     product_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     deactivate_on: Option<Vec<String>>,
-    //     images: Option<Vec<String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    //     dimensions: Option<Dimensions>,
-    // ) -> Result<Product> {
-    //     self.post(&format!("/products/{}", product_id), &(
-    //         args,
-    //         deactivate_on.map(|d| UrlEncodable::list("deactivate_on", &d)),
-    //         images.map(|i| UrlEncodable::list("images", &i)),
-    //         UrlEncodable::named("metadata", &metadata),
-    //         UrlEncodable::named("package_dimensions", &dimensions),
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#list_products
-    // pub fn list_products(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>,
-    //     ids: Option<Vec<String>>,
-    // ) -> Result<ApiList<Product>> {
-    //     self.get("/products", &(
-    //         ("include[]", "total_count"),
-    //         args,
-    //         ids.map(|ids| UrlEncodable::list("ids", &ids))
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_product
-    // pub fn delete_product(
-    //     &self,
-    //     product_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/producst/{}", product_id))
-    // }
-
-    // /// https://stripe.com/docs/api#create_sku
-    // pub fn create_sku(
-    //     &self,
-    //     currency: &str,
-    //     price: i64,
-    //     product: &str,
-    //     inventory: Inventory,
-    //     attributes: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    //     package_dimensions: Option<Dimensions>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<Sku> {
-    //     self.post("/skus", &(
-    //         ("currency", currency),
-    //         ("price", price.to_string()),
-    //         ("product", product),
-    //         UrlEncodable::named("inventory", &inventory),
-    //         UrlEncodable::named("attributes", &attributes),
-    //         UrlEncodable::named("metadata", &metadata),
-    //         UrlEncodable::named("package_dimensions", &package_dimensions),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_sku
-    // pub fn retrieve_sku(
-    //     &self,
-    //     sku_id: &str
-    // ) -> Result<Sku> {
-    //     self.get(&format!("/skus/{}", sku_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_sku
-    // pub fn update_sku(
-    //     &self,
-    //     sku_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     inventory: Option<Inventory>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    //     package_dimensions: Option<Dimensions>
-    // ) -> Result<Sku> {
-    //     self.post(&format!("/skus/{}", sku_id), &(
-    //         args,
-    //         UrlEncodable::named("inventory", &inventory),
-    //         UrlEncodable::named("metadata", &metadata),
-    //         UrlEncodable::named("package_dimensions", &package_dimensions),
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#list_skus
-    // pub fn list_skus(
-    //     &self,
-    //     attributes: Option<BTreeMap<String, String>>,
-    //     ids: Option<Vec<String>>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Sku>> {
-    //     self.get("/skus", &(
-    //         ("include[]", "total_count"),
-    //         UrlEncodable::named("attributes", &attributes),
-    //         ids.map(|ids| UrlEncodable::list("ids", &ids)),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_sku
-    // pub fn delete_sku(
-    //     &self,
-    //     sku_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/skus/{}", sku_id))
-    // }
-
-    // /// https://stripe.com/docs/api#create_coupon
-    // pub fn create_coupon(
-    //     &self,
-    //     duration: CouponDuration,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>,
-    // ) -> Result<Coupon> {
-    //     self.post("/coupons", &(
-    //         ("duration", duration.to_string()),
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_coupon
-    // pub fn retrieve_coupon(
-    //     &self,
-    //     coupon_id: &str
-    // ) -> Result<Coupon> {
-    //     self.get(&format!("/coupons/{}", coupon_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_coupon
-    // pub fn update_coupon(
-    //     &self,
-    //     coupon_id: &str,
-    //     metadata: BTreeMap<String, String>
-    // ) -> Result<Coupon> {
-    //     self.post(&format!("/coupons/{}", coupon_id), &(
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_coupon
-    // pub fn delete_coupon(
-    //     &self,
-    //     coupon_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/coupons/{}", coupon_id))
-    // }
-
-    // /// https://stripe.com/docs/api#list_coupons
-    // pub fn list_coupons(
-    //     &self,
-    //     created_constraint: Option<TimeConstraint>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Coupon>> {
-    //     self.get("/coupons", &(
-    //         ("include[]", "total_count"),
-    //         UrlEncodable::named("created", &created_constraint),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_discount
-    // pub fn delete_discount(
-    //     &self,
-    //     customer_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/customers/{}/discount", customer_id))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_subscription_discount
-    // pub fn delete_subscription_discount(
-    //     &self,
-    //     customer_id: &str,
-    //     subscription_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/customers/{}/subscriptions/{}/discount", customer_id, subscription_id))
-    // }
-
-    // /// https://stripe.com/docs/api#create_invoice
-    // pub fn create_invoice(
-    //     &self,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Invoice> {
-    //     self.post("/invoices", &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_invoice
-    // pub fn retrieve_invoice(
-    //     &self,
-    //     invoice_id: &str
-    // ) -> Result<Invoice> {
-    //     self.get(&format!("/invoices/{}", invoice_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#invoice_lines
-    // pub fn invoice_lines(
-    //     &self,
-    //     invoice_id: &str,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<InvoiceLineItem>> {
-    //     self.get(&format!("/invoices/{}/lines", invoice_id), &(
-    //         ("include[]", "total_count"),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#upcoming_invoice
-    // pub fn upcoming_invoice(
-    //     &self,
-    //     customer_id: &str,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<Invoice> {
-    //     self.get("/invoices/upcoming", &(
-    //         ("customer", customer_id),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#update_invoice
-    // pub fn update_invoice(
-    //     &self,
-    //     invoice_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Invoice> {
-    //     self.post(&format!("/invoices/{}", invoice_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#pay_invoice
-    // pub fn pay_invoice(
-    //     &self,
-    //     invoice_id: &str
-    // ) -> Result<Invoice> {
-    //     self.post(&format!("/invoices/{}/pay", invoice_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#list_invoices
-    // pub fn list_invoices(
-    //     &self,
-    //     date_constraint: Option<TimeConstraint>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Invoice>> {
-    //     self.get("/invoices", &(
-    //         UrlEncodable::named("date", &date_constraint),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_invoiceitem
-    // pub fn create_invoiceitem(
-    //     &self,
-    //     amount: i64,
-    //     currency: Currency,
-    //     customer_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Invoiceitem> {
-    //     self.post("/invoiceitems", &(
-    //         ("amount", amount.to_string()),
-    //         ("currency", currency.to_string()),
-    //         ("customer", customer_id),
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_invoiceitem
-    // pub fn retrieve_invoiceitem(
-    //     &self,
-    //     invoiceitem_id: &str
-    // ) -> Result<Invoiceitem> {
-    //     self.get(&format!("/invoiceitems/{}", invoiceitem_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_invoiceitem
-    // pub fn update_invoiceitem(
-    //     &self,
-    //     invoiceitem_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Invoiceitem> {
-    //     self.post(&format!("/invoiceitems/{}", invoiceitem_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_invoiceitem
-    // pub fn delete_invoiceitem(
-    //     &self,
-    //     invoiceitem_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/invoiceitems/{}", invoiceitem_id))
-    // }
-
-    // /// https://stripe.com/docs/api#list_invoiceitems
-    // pub fn list_invoiceitems(
-    //     &self,
-    //     created_constraint: Option<TimeConstraint>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Invoiceitem>> {
-    //     self.get("/invoiceitems", &(
-    //         ("include[]", "total_count"),
-    //         UrlEncodable::named("created", &created_constraint),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_plan
-    // pub fn create_plan(
-    //     &self,
-    //     plan_id: &str,
-    //     amount: i64,
-    //     currency: Currency,
-    //     interval: Interval,
-    //     plan_name: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Plan> {
-    //     self.post("/plans", &(
-    //         ("id", plan_id),
-    //         ("amount", amount.to_string()),
-    //         ("currency", currency.to_string()),
-    //         ("interval", interval.to_string()),
-    //         ("name", plan_name),
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_plan
-    // pub fn retrieve_plan(
-    //     &self,
-    //     plan_id: &str
-    // ) -> Result<Plan> {
-    //     self.get(&format!("/plans/{}", plan_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_plan
-    // pub fn update_plan(
-    //     &self,
-    //     plan_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Plan> {
-    //     self.post(&format!("/plans/{}", plan_id), &(
-    //         args,
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#delete_plan
-    // pub fn delete_plan(
-    //     &self,
-    //     plan_id: &str
-    // ) -> Result<Delete> {
-    //     self.delete(&format!("/plans/{}", plan_id))
-    // }
-
-    // /// https://stripe.com/docs/api#list_plans
-    // pub fn list_plans(
-    //     &self,
-    //     created_constraint: Option<TimeConstraint>,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Plan>> {
-    //     self.get("/plans", &(
-    //         ("include[]", "total_count"),
-    //         UrlEncodable::named("created", &created_constraint),
-    //         args
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#create_subscription
-    // pub fn create_subscription(
-    //     &self,
-    //     customer_id: &str,
-    //     plan_id: &str,
-    //     card_token_or_args: Option<Either<String, BTreeMap<String, String>>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Subscription> {
-    //     self.post(&format!("/customers/{}/subscriptions", customer_id), &(
-    //         ("plan", plan_id),
-    //         card_token_or_args.map(|ct| token_or_args("source", ct)),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#retrieve_subscription
-    // pub fn retrieve_subscription(
-    //     &self,
-    //     customer_id: &str,
-    //     subscription_id: &str
-    // ) -> Result<Subscription> {
-    //     self.get(&format!("/customers/{}/subscriptions/{}", customer_id, subscription_id), &())
-    // }
-
-    // /// https://stripe.com/docs/api#update_subscription
-    // pub fn update_subscription(
-    //     &self,
-    //     customer_id: &str,
-    //     subscription_id: &str,
-    //     args: Option<BTreeMap<String, String>>,
-    //     card_token_or_args: Option<Either<String, BTreeMap<String, String>>>,
-    //     metadata: Option<BTreeMap<String, String>>
-    // ) -> Result<Subscription> {
-    //     self.post(&format!("/customers/{}/subscriptions/{}", customer_id, subscription_id), &(
-    //         args,
-    //         card_token_or_args.map(|ct| token_or_args("source", ct)),
-    //         UrlEncodable::named("metadata", &metadata)
-    //     ))
-    // }
-
-    // /// https://stripe.com/docs/api#cancel_subscription
-    // pub fn cancel_subscription(
-    //     &self,
-    //     customer_id: &str,
-    //     subscription_id: &str,
-    //     at_period_end: bool
-    // ) -> Result<Subscription> {
-    //     let endpoint = &format!("/customers/{}/subscriptions/{}", customer_id, subscription_id);
-    //     let res = self.client.delete(&StripeClient::endpoint(endpoint))
-    //         .headers(self.default_headers())
-    //         .body(&("at_period_end", at_period_end.to_string()).encoded_string())
-    //         .send()?;
-    //     StripeClient::parse_response::<Subscription>(res)
-    // }
-
-    // /// https://stripe.com/docs/api#list_subscriptions
-    // pub fn list_subscriptions(
-    //     &self,
-    //     customer_id: &str,
-    //     args: Option<BTreeMap<String, String>>
-    // ) -> Result<ApiList<Subscription>> {
-    //     self.get(&format!("/customers/{}/subscriptions", customer_id), &(
-    //         ("include[]", "total_count"),
-    //         args
-    //     ))
-    // }
+    /// https://stripe.com/docs/api#retrieve_balance
+    pub fn retrieve_balance<'a>(&'a self) -> RetrieveBalanceCall<'a> {
+        RetrieveBalanceCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_balance_transaction
+    pub fn retrieve_balance_transaction<'a>(
+        &'a self,
+        transaction_id: String
+    ) -> RetrieveBalanceTransactionCall<'a> {
+        RetrieveBalanceTransactionCall::new(self, transaction_id)
+    }
+
+    /// https://stripe.com/docs/api#balance_history
+    pub fn list_balance_history<'a>(&'a self) -> ListBalanceHistoryCall<'a> {
+        ListBalanceHistoryCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_charge
+    pub fn create_charge<'a>(
+        &'a self,
+        amount: i64,
+        currency: Currency,
+    ) -> CreateChargeCall<'a> {
+        CreateChargeCall::new(self, amount, currency)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_charge
+    pub fn retrieve_charge<'a>(&'a self, charge_id: String) -> RetrieveChargeCall<'a> {
+        RetrieveChargeCall::new(self, charge_id)
+    }
+
+    /// https://stripe.com/docs/api#update_charge
+    pub fn update_charge<'a>(&'a self, charge_id: String) -> UpdateChargeCall<'a> {
+        UpdateChargeCall::new(self, charge_id)
+    }
+
+    /// https://stripe.com/docs/api#capture_charge
+    pub fn capture_charge<'a>(&'a self, charge_id: String) -> CaptureChargeCall<'a> {
+        CaptureChargeCall::new(self, charge_id)
+    }
+
+    /// https://stripe.com/docs/api#list_charges
+    pub fn list_charges<'a>(&'a self) -> ListChargesCall<'a> {
+        ListChargesCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_customer
+    pub fn create_customer<'a>(&'a self) -> CreateCustomerCall<'a> {
+        CreateCustomerCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_customer
+    pub fn retrieve_customer<'a>(&'a self, customer_id: String) -> RetrieveCustomerCall<'a> {
+        RetrieveCustomerCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#update_customer
+    pub fn update_customer<'a>(&'a self, customer_id: String) -> UpdateCustomerCall<'a> {
+        UpdateCustomerCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#delete_customer
+    pub fn delete_customer<'a>(&'a self, customer_id: String) -> DeleteCustomerCall<'a> {
+        DeleteCustomerCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#list_customers
+    pub fn list_customers<'a>(&'a self) -> ListCustomersCall<'a> {
+        ListCustomersCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_dispute
+    pub fn retrieve_dispute<'a>(&'a self, dispute_id: String) -> RetrieveDisputeCall<'a> {
+        RetrieveDisputeCall::new(self, dispute_id)
+    }
+
+    /// https://stripe.com/docs/api#update_dispute
+    pub fn update_dispute<'a>(&'a self, dispute_id: String) -> UpdateDisputeCall<'a> {
+        UpdateDisputeCall::new(self, dispute_id)
+    }
+
+    /// https://stripe.com/docs/api#close_dispute
+    pub fn close_dispute<'a>(&'a self, dispute_id: String) -> CloseDisputeCall<'a> {
+        CloseDisputeCall::new(self, dispute_id)
+    }
+
+    /// https://stripe.com/docs/api#list_disputes
+    pub fn list_disputes<'a>(&'a self) -> ListDisputesCall<'a> {
+        ListDisputesCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_event
+    pub fn retrieve_event<'a>(&'a self, event_id: String) -> RetrieveEventCall<'a> {
+        RetrieveEventCall::new(self, event_id)
+    }
+
+    /// https://stripe.com/docs/api#list_events
+    pub fn list_events<'a>(&'a self) -> ListEventCall<'a> {
+        ListEventCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_refund
+    pub fn create_refund<'a>(&'a self, charge_id: String) -> CreateRefundCall<'a> {
+        CreateRefundCall::new(self, charge_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_refund
+    pub fn retrieve_refund<'a>(&'a self, refund_id: String) -> RetrieveRefundCall<'a> {
+        RetrieveRefundCall::new(self, refund_id)
+    }
+
+    /// https://stripe.com/docs/api#update_refund
+    pub fn update_refund<'a>(&'a self, refund_id: String) -> UpdateRefundCall<'a> {
+        UpdateRefundCall::new(self, refund_id)
+    }
+
+    /// https://stripe.com/docs/api#list_refunds
+    pub fn list_refunds<'a>(&'a self) -> ListRefundCall<'a> {
+        ListRefundCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_card_token
+    pub fn create_card_token<'a>(&'a self) -> CreateCardTokenCall<'a> {
+        CreateCardTokenCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_bank_account_token
+    pub fn create_bank_account_token<'a>(&'a self) -> CreateBankAccountTokenCall<'a> {
+        CreateBankAccountTokenCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_pii_token
+    pub fn create_pii_token<'a>(&'a self, personal_id_number: String) -> CreatePiiTokenCall<'a> {
+        CreatePiiTokenCall::new(self, personal_id_number)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_token
+    pub fn retrieve_token<'a>(&'a self, token_id: String) -> RetrieveTokenCall<'a> {
+        RetrieveTokenCall::new(self, token_id)
+    }
+
+    /// https://stripe.com/docs/api#create_transfer
+    pub fn create_transfer<'a>(
+        &'a self,
+        amount: i64,
+        currency: Currency,
+        destination: String
+    ) -> CreateTransferCall<'a> {
+        CreateTransferCall::new(self, amount, currency, destination)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_transfer
+    pub fn retrieve_transfer<'a>(&'a self, transfer_id: String) -> RetrieveTransferCall<'a> {
+        RetrieveTransferCall::new(self, transfer_id)
+    }
+
+    /// https://stripe.com/docs/api#update_transfer
+    pub fn update_transfer<'a>(&'a self, transfer_id: String) -> UpdateTransferCall<'a> {
+        UpdateTransferCall::new(self, transfer_id)
+    }
+
+    /// https://stripe.com/docs/api#list_transfers
+    pub fn list_transfers<'a>(&'a self) -> ListTransfersCall<'a> {
+        ListTransfersCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_transfer_reversal
+    pub fn create_transfer_reversal<'a>(&'a self, transfer_id: String) -> CreateTransferReversalCall<'a> {
+        CreateTransferReversalCall::new(self, transfer_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_transfer_reversal
+    pub fn retrieve_transfer_reversal<'a>(
+        &'a self,
+        transfer_id: String,
+        reversal_id: String
+    ) -> RetrieveTransferReversalCall<'a> {
+        RetrieveTransferReversalCall::new(self, transfer_id, reversal_id)
+    }
+
+    /// https://stripe.com/docs/api#update_transfer_reversal
+    pub fn update_transfer_reversal<'a>(
+        &'a self,
+        transfer_id: String,
+        reversal_id: String
+    ) -> UpdateTransferReversalCall<'a> {
+        UpdateTransferReversalCall::new(self, transfer_id, reversal_id)
+    }
+
+    /// https://stripe.com/docs/api#list_transfer_reversals
+    pub fn list_transfer_reversals<'a>(
+        &'a self,
+        transfer_id: String
+    ) -> ListTransferReversalsCall<'a> {
+        ListTransferReversalsCall::new(self, transfer_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_account
+    /// Fetch account associated with self.key
+    pub fn retrieve_current_account<'a>(&'a self) -> RetrieveAccountCall<'a> {
+        RetrieveAccountCall::new(self, None)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_account
+    pub fn retrieve_account<'a>(&'a self, account_id: String) -> RetrieveAccountCall<'a> {
+        RetrieveAccountCall::new(self, Some(account_id))
+    }
+
+    /// https://stripe.com/docs/api#create_account
+    pub fn create_account<'a>(&'a self) -> CreateAccountCall<'a> {
+        CreateAccountCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#update_account
+    pub fn update_account<'a>(&'a self, account_id: String) -> UpdateAccountCall<'a> {
+        UpdateAccountCall::new(self, account_id)
+    }
+
+    /// https://stripe.com/docs/api#delete_account
+    pub fn delete_account<'a>(&'a self, account_id: String) -> DeleteAccountCall<'a> {
+        DeleteAccountCall::new(self, account_id)
+    }
+
+    /// https://stripe.com/docs/api#reject_account
+    pub fn reject_account<'a>(
+        &'a self,
+        account_id: String,
+        reason: AccountRejectReason
+    ) -> RejectAccountCall<'a> {
+        RejectAccountCall::new(self, account_id, reason)
+    }
+
+    /// https://stripe.com/docs/api#list_accounts
+    pub fn list_accounts<'a>(&'a self) -> ListAccountsCall<'a> {
+        ListAccountsCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_fee_refund
+    pub fn create_fee_refund<'a>(&'a self, application_fee_id: String) -> CreateFeeRefundCall<'a> {
+        CreateFeeRefundCall::new(self, application_fee_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_fee_refund
+    pub fn retrieve_fee_refund<'a>(
+        &'a self,
+        application_fee_id: String,
+        refund_id: String
+    ) -> RetrieveFeeRefundCall<'a> {
+        RetrieveFeeRefundCall::new(self, application_fee_id, refund_id)
+    }
+
+    /// https://stripe.com/docs/api#update_fee_refund
+    pub fn update_fee_refund<'a>(
+        &'a self,
+        application_fee_id: String,
+        refund_id: String
+    ) -> UpdateFeeRefundCall<'a> {
+        UpdateFeeRefundCall::new(self, application_fee_id, refund_id)
+    }
+
+    /// https://stripe.com/docs/api#list_fee_refunds
+    pub fn list_fee_refunds<'a>(&'a self, application_fee_id: String) -> ListFeeRefundsCall<'a> {
+        ListFeeRefundsCall::new(self, application_fee_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_application_fee
+    pub fn retrieve_application_fee<'a>(&'a self, fee_id: String) -> RetrieveApplicationFeeCall<'a> {
+        RetrieveApplicationFeeCall::new(self, fee_id)
+    }
+
+    /// https://stripe.com/docs/api#list_application_fees
+    pub fn list_application_fees<'a>(&'a self) -> ListApplicationFeesCall<'a> {
+        ListApplicationFeesCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#list_country_specs
+    pub fn list_country_specs<'a>(&'a self) -> ListCountrySpecCall<'a> {
+        ListCountrySpecCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_country_spec
+    pub fn retrieve_country_spec<'a>(&'a self, iso_code: String) -> RetrieveCountrySpecCall<'a> {
+        RetrieveCountrySpecCall::new(self, iso_code)
+    }
+
+    /// https://stripe.com/docs/api#account_create_bank_account
+    pub fn account_create_bank_account<'a>(
+        &'a self,
+        account_id: String
+    ) -> AccountCreateBankAccountCall<'a> {
+        AccountCreateBankAccountCall::new(self, account_id)
+    }
+
+    /// https://stripe.com/docs/api#account_retrieve_bank_account
+    pub fn account_retrieve_bank_account<'a>(
+        &'a self,
+        account_id: String,
+        bank_account_id: String
+    ) -> AccountRetrieveBankAccountCall<'a> {
+        AccountRetrieveBankAccountCall::new(self, account_id, bank_account_id)
+    }
+
+    /// https://stripe.com/docs/api#account_update_bank_account
+    pub fn account_update_bank_account<'a>(
+        &'a self,
+        account_id: String,
+        bank_account_id: String
+    ) -> AccountUpdateBankAccountCall<'a> {
+        AccountUpdateBankAccountCall::new(self, account_id, bank_account_id)
+    }
+
+    /// https://stripe.com/docs/api#account_delete_bank_account
+    pub fn account_delete_bank_account<'a>(
+        &'a self,
+        account_id: String,
+        bank_account_id: String
+    ) -> AccountDeleteBankAccountCall<'a> {
+        AccountDeleteBankAccountCall::new(self, account_id, bank_account_id)
+    }
+
+    /// https://stripe.com/docs/api#account_list_bank_accounts
+    pub fn account_list_bank_accounts<'a>(
+        &'a self,
+        account_id: String
+    ) -> AccountListBankAccountsCall<'a> {
+        AccountListBankAccountsCall::new(self, account_id)
+    }
+
+    /// https://stripe.com/docs/api#account_create_card
+    pub fn account_create_card<'a>(&'a self, account_id: String) -> AccountCreateCardCall<'a> {
+        AccountCreateCardCall::new(self, account_id)
+    }
+
+    /// https://stripe.com/docs/api#account_retrieve_card
+    pub fn account_retrieve_card<'a>(
+        &'a self,
+        account_id: String,
+        card_id: String
+    ) -> AccountRetrieveCardCall<'a> {
+        AccountRetrieveCardCall::new(self, account_id, card_id)
+    }
+
+    /// https://stripe.com/docs/api#account_update_card
+    pub fn account_update_card<'a>(
+        &'a self,
+        account_id: String,
+        card_id: String
+    ) -> AccountUpdateCardCall<'a> {
+        AccountUpdateCardCall::new(self, account_id, card_id)
+    }
+
+    /// https://stripe.com/docs/api#account_delete_card
+    pub fn account_delete_card<'a>(
+        &'a self,
+        account_id: String,
+        card_id: String
+    ) -> AccountDeleteCardCall<'a> {
+        AccountDeleteCardCall::new(self, account_id, card_id)
+    }
+
+    /// https://stripe.com/docs/api#account_list_cards
+    pub fn account_list_cards<'a>(&'a self, account_id: String) -> AccountListCardsCall<'a> {
+        AccountListCardsCall::new(self, account_id)
+    }
+
+    /// https://stripe.com/docs/api#customer_create_bank_account
+    pub fn customer_create_bank_account<'a>(
+        &'a self,
+        customer_id: String
+    ) -> CustomerCreateBankAccountCall<'a> {
+        CustomerCreateBankAccountCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#customer_retrieve_bank_account
+    pub fn customer_retrieve_bank_account<'a>(
+        &'a self,
+        customer_id: String,
+        bank_account_id: String
+    ) -> CustomerRetrieveBankAccountCall<'a> {
+        CustomerRetrieveBankAccountCall::new(self, customer_id, bank_account_id)
+    }
+
+    /// https://stripe.com/docs/api#customer_update_bank_account
+    pub fn customer_update_bank_account<'a>(
+        &'a self,
+        customer_id: String,
+        bank_account_id: String
+    ) -> CustomerUpdateBankAccountCall<'a> {
+        CustomerUpdateBankAccountCall::new(self, customer_id, bank_account_id)
+    }
+
+    /// https://stripe.com/docs/api#customer_delete_bank_account
+    pub fn customer_delete_bank_account<'a>(
+        &'a self,
+        customer_id: String,
+        bank_account_id: String
+    ) -> CustomerDeleteBankAccountCall<'a> {
+        CustomerDeleteBankAccountCall::new(self, customer_id, bank_account_id)
+    }
+
+    /// https://stripe.com/docs/api#customer_list_bank_accounts
+    pub fn customer_list_bank_accounts<'a>(
+        &'a self,
+        customer_id: String
+    ) -> CustomerListBankAccountsCall<'a> {
+        CustomerListBankAccountsCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#create_bitcoin_receiver
+    pub fn create_bitcoin_receiver<'a>(
+        &'a self,
+        amount: i64,
+        currency: Currency,
+        email: String
+    ) -> CreateBitcoinReceiverCall<'a> {
+        CreateBitcoinReceiverCall::new(self, amount, currency, email)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_bitcoin_receiver
+    pub fn retrieve_bitcoin_receiver<'a>(&'a self, receiver_id: String) -> RetrieveBitcoinReceiverCall<'a> {
+        RetrieveBitcoinReceiverCall::new(self, receiver_id)
+    }
+
+    /// https://stripe.com/docs/api#list_bitcoin_receivers
+    pub fn list_bitcoin_receivers<'a>(&'a self) -> ListBitcoinReceiversCall<'a> {
+        ListBitcoinReceiversCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_card
+    pub fn create_card<'a>(
+        &'a self,
+        customer_id: String
+    ) -> CustomerCreateCardCall<'a> {
+        CustomerCreateCardCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_card
+    pub fn retrieve_card<'a>(
+        &'a self,
+        customer_id: String,
+        card_id: String
+    ) -> CustomerRetrieveCardCall<'a> {
+        CustomerRetrieveCardCall::new(self, customer_id, card_id)
+    }
+
+    /// https://stripe.com/docs/api#update_card
+    pub fn update_card<'a>(
+        &'a self,
+        customer_id: String,
+        card_id: String
+    ) -> CustomerUpdateCardCall<'a> {
+        CustomerUpdateCardCall::new(self, customer_id, card_id)
+    }
+
+    /// https://stripe.com/docs/api#delete_card
+    pub fn delete_card<'a>(
+        &'a self,
+        customer_id: String,
+        card_id: String
+    ) -> CustomerDeleteCardCall<'a> {
+        CustomerDeleteCardCall::new(self, customer_id, card_id)
+    }
+
+    /// https://stripe.com/docs/api#list_cards
+    pub fn list_cards<'a>(&'a self, customer_id: String) -> CustomerListCardsCall<'a> {
+        CustomerListCardsCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#create_order
+    pub fn create_order<'a>(&'a self, currency: Currency) -> CreateOrderCall<'a> {
+        CreateOrderCall::new(self, currency)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_order
+    pub fn retrieve_order<'a>(&'a self, order_id: String) -> RetrieveOrderCall<'a> {
+        RetrieveOrderCall::new(self, order_id)
+    }
+
+    /// https://stripe.com/docs/api#update_order
+    pub fn update_order<'a>(&'a self, order_id: String) -> UpdateOrderCall<'a> {
+        UpdateOrderCall::new(self, order_id)
+    }
+
+    /// https://stripe.com/docs/api#pay_order
+    pub fn pay_order<'a>(&'a self, order_id: String) -> PayOrderCall<'a> {
+        PayOrderCall::new(self, order_id)
+    }
+
+    /// https://stripe.com/docs/api#list_orders
+    pub fn list_orders<'a>(&'a self) -> ListOrdersCall<'a> {
+        ListOrdersCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_product
+    pub fn create_product<'a>(&'a self, name: String) -> CreateProductCall<'a> {
+        CreateProductCall::new(self, name)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_product
+    pub fn retrieve_product<'a>(&'a self, product_id: String) -> RetrieveProductCall<'a> {
+        RetrieveProductCall::new(self, product_id)
+    }
+
+    /// https://stripe.com/docs/api#update_product
+    pub fn update_product<'a>(&'a self, product_id: String) -> UpdateProductCall<'a> {
+        UpdateProductCall::new(self, product_id)
+    }
+
+    /// https://stripe.com/docs/api#delete_product
+    pub fn delete_product<'a>(&'a self, product_id: String) -> DeleteProductCall<'a> {
+        DeleteProductCall::new(self, product_id)
+    }
+
+    /// https://stripe.com/docs/api#list_products
+    pub fn list_products<'a>(&'a self) -> ListProductsCall<'a> {
+        ListProductsCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_sku
+    pub fn create_sku<'a>(
+        &'a self,
+        currency: Currency,
+        inventory: Inventory,
+        price: i64,
+        product: String
+    ) -> CreateSkuCall<'a> {
+        CreateSkuCall::new(self, currency, inventory, price, product)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_sku
+    pub fn retrieve_sku<'a>(&'a self, sku_id: String) -> RetrieveSkuCall<'a> {
+        RetrieveSkuCall::new(self, sku_id)
+    }
+
+    /// https://stripe.com/docs/api#update_sku
+    pub fn update_sku<'a>(&'a self, sku_id: String) -> UpdateSkuCall<'a> {
+        UpdateSkuCall::new(self, sku_id)
+    }
+
+    /// https://stripe.com/docs/api#list_skus
+    pub fn list_skus<'a>(&'a self) -> ListSkusCall<'a> {
+        ListSkusCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#delete_sku
+    pub fn delete_sku<'a>(&'a self, sku_id: String) -> DeleteSkuCall<'a> {
+        DeleteSkuCall::new(self, sku_id)
+    }
+
+    /// https://stripe.com/docs/api#create_coupon
+    pub fn create_coupon<'a>(&'a self, duration: CouponDuration) -> CreateCouponCall<'a> {
+        CreateCouponCall::new(self, duration)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_coupon
+    pub fn retrieve_coupon<'a>(&'a self, coupon_id: String) -> RetrieveCouponCall<'a> {
+        RetrieveCouponCall::new(self, coupon_id)
+    }
+
+    /// https://stripe.com/docs/api#update_coupon
+    pub fn update_coupon<'a>(&'a self, coupon_id: String) -> UpdateCouponCall<'a> {
+        UpdateCouponCall::new(self, coupon_id)
+    }
+
+    /// https://stripe.com/docs/api#delete_coupon
+    pub fn delete_coupon<'a>(&'a self, coupon_id: String) -> DeleteCouponCall<'a> {
+        DeleteCouponCall::new(self, coupon_id)
+    }
+
+    /// https://stripe.com/docs/api#list_coupons
+    pub fn list_coupons<'a>(&'a self) -> ListCouponsCall<'a> {
+        ListCouponsCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#delete_discount
+    pub fn delete_discount<'a>(&'a self, customer_id: String) -> DeleteCustomerDiscountCall<'a> {
+        DeleteCustomerDiscountCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#delete_subscription_discount
+    pub fn delete_subscription_discount<'a>(
+        &'a self,
+        customer_id: String,
+        subscription_id: String
+    ) -> DeleteSubscriptionDiscountCall<'a> {
+        DeleteSubscriptionDiscountCall::new(self, customer_id, subscription_id)
+    }
+
+    /// https://stripe.com/docs/api#create_invoice
+    pub fn create_invoice<'a>(&'a self, customer_id: String) -> CreateInvoiceCall<'a> {
+        CreateInvoiceCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_invoice
+    pub fn retrieve_invoice<'a>(&'a self, invoice_id: String) -> RetrieveInvoiceCall<'a> {
+        RetrieveInvoiceCall::new(self, invoice_id)
+    }
+
+    /// https://stripe.com/docs/api#invoice_lines
+    pub fn retrieve_invoice_lines<'a>(&'a self, invoice_id: String) -> RetrieveInvoiceLinesCall<'a> {
+        RetrieveInvoiceLinesCall::new(self, invoice_id)
+    }
+
+    /// https://stripe.com/docs/api#upcoming_invoice
+    pub fn retrieve_upcoming_invoice<'a>(
+        &'a self,
+        customer_id: String
+    ) -> RetrieveUpcomingInvoiceCall<'a> {
+        RetrieveUpcomingInvoiceCall::new(self, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#update_invoice
+    pub fn update_invoice<'a>(&'a self, invoice_id: String) -> UpdateInvoiceCall<'a> {
+        UpdateInvoiceCall::new(self, invoice_id)
+    }
+
+    /// https://stripe.com/docs/api#pay_invoice
+    pub fn pay_invoice<'a>(&'a self, invoice_id: String) -> PayInvoiceCall<'a> {
+        PayInvoiceCall::new(self, invoice_id)
+    }
+
+    /// https://stripe.com/docs/api#list_invoices
+    pub fn list_invoices<'a>(&'a self) -> ListInvoicesCall<'a> {
+        ListInvoicesCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_invoiceitem
+    pub fn create_invoiceitem<'a>(
+        &'a self,
+        amount: i64,
+        currency: Currency,
+        customer_id: String
+    ) -> CreateInvoiceitemCall<'a> {
+        CreateInvoiceitemCall::new(self, amount, currency, customer_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_invoiceitem
+    pub fn retrieve_invoiceitem<'a>(
+        &'a self,
+        invoiceitem_id: String
+    ) -> RetrieveInvoiceitemCall<'a> {
+        RetrieveInvoiceitemCall::new(self, invoiceitem_id)
+    }
+
+    /// https://stripe.com/docs/api#update_invoiceitem
+    pub fn update_invoiceitem<'a>(
+        &'a self,
+        invoiceitem_id: String
+    ) -> UpdateInvoiceitemCall<'a> {
+        UpdateInvoiceitemCall::new(self, invoiceitem_id)
+    }
+
+    /// https://stripe.com/docs/api#delete_invoiceitem
+    pub fn delete_invoiceitem<'a>(
+        &'a self,
+        invoiceitem_id: String
+    ) -> DeleteInvoiceitemCall<'a> {
+        DeleteInvoiceitemCall::new(self, invoiceitem_id)
+    }
+
+    /// https://stripe.com/docs/api#list_invoiceitems
+    pub fn list_invoiceitems<'a>(&'a self) -> ListInvoiceitemsCall<'a> {
+        ListInvoiceitemsCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_plan
+    pub fn create_plan<'a>(
+        &'a self,
+        plan_id: String,
+        amount: i64,
+        currency: Currency,
+        interval: Interval,
+        name: String
+    ) -> CreatePlanCall<'a> {
+        CreatePlanCall::new(self, plan_id, amount, currency, interval, name)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_plan
+    pub fn retrieve_plan<'a>(&'a self, plan_id: String) -> RetrievePlanCall<'a> {
+        RetrievePlanCall::new(self, plan_id)
+    }
+
+    /// https://stripe.com/docs/api#update_plan
+    pub fn update_plan<'a>(&'a self, plan_id: String) -> UpdatePlanCall<'a> {
+        UpdatePlanCall::new(self, plan_id)
+    }
+
+    /// https://stripe.com/docs/api#delete_plan
+    pub fn delete_plan<'a>(&'a self, plan_id: String) -> DeletePlanCall<'a> {
+        DeletePlanCall::new(self, plan_id)
+    }
+
+    /// https://stripe.com/docs/api#list_plans
+    pub fn list_plans<'a>(&'a self) -> ListPlansCall<'a> {
+        ListPlansCall::new(self)
+    }
+
+    /// https://stripe.com/docs/api#create_subscription
+    pub fn create_subscription<'a>(
+        &'a self,
+        customer_id: String,
+        plan_id: String
+    ) -> CreateSubscriptionCall<'a> {
+        CreateSubscriptionCall::new(self, customer_id, plan_id)
+    }
+
+    /// https://stripe.com/docs/api#retrieve_subscription
+    pub fn retrieve_subscription<'a>(
+        &'a self,
+        customer_id: String,
+        subscription_id: String
+    ) -> RetrieveSubscriptionCall<'a> {
+        RetrieveSubscriptionCall::new(self, customer_id, subscription_id)
+    }
+
+    /// https://stripe.com/docs/api#update_subscription
+    pub fn update_subscription<'a>(
+        &'a self,
+        customer_id: String,
+        subscription_id: String
+    ) -> UpdateSubscriptionCall<'a> {
+        UpdateSubscriptionCall::new(self, customer_id, subscription_id)
+    }
+
+    /// https://stripe.com/docs/api#cancel_subscription
+    pub fn cancel_subscription<'a>(
+        &'a self,
+        customer_id: String,
+        subscription_id: String
+    ) -> CancelSubscriptionCall<'a> {
+        CancelSubscriptionCall::new(self, customer_id, subscription_id)
+    }
+
+    /// https://stripe.com/docs/api#list_subscriptions
+    pub fn list_subscriptions<'a>(
+        &'a self,
+        customer_id: String
+    ) -> ListActiveSubscriptionsCall<'a> {
+        ListActiveSubscriptionsCall::new(self, customer_id)
+    }
 
     pub fn get<T: Deserialize, E: Display>(
         &self,
@@ -1602,16 +950,6 @@ impl StripeClient {
         }));
         headers.set(StripeVersion::new(API_VERSION));
         headers
-    }
-}
-
-fn token_or_args<T: UrlEncodable>(
-    name: &str,
-    token_or_args: Either<String, T>
-) -> Vec<(String, String)> {
-    match token_or_args {
-        Left(token) => vec![(name.to_string(), token)],
-        Right(args) => UrlEncodable::named(name, &args)
     }
 }
 

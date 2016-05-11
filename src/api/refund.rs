@@ -2,23 +2,22 @@ use call_args::CallArgs;
 use model::{ApiList, Refund, RefundReason};
 use std::collections::BTreeMap;
 use super::ApiCall;
-use time_constraint::TimeConstraint;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateRefundRequest<'a> {
+pub struct CreateRefundCall<'a> {
     client: &'a StripeClient,
     args: CallArgs,
 }
 
-impl<'a> CreateRefundRequest<'a> {
+impl<'a> CreateRefundCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         charge_id: String,
-    ) -> CreateRefundRequest<'a> {
-        CreateRefundRequest {
-            client: client
-            args: CallArgs(vec![("charge".to_string(), charge)])
+    ) -> CreateRefundCall<'a> {
+        CreateRefundCall {
+            client: client,
+            args: CallArgs(vec![("charge".to_string(), charge_id)])
         }
     }
 
@@ -48,45 +47,45 @@ impl<'a> CreateRefundRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Refund> for CreateRefundRequest<'a> {
+impl<'a> ApiCall<Refund> for CreateRefundCall<'a> {
     fn call(self) -> Result<Refund> {
         self.client.post("/refunds", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveRefundRequest<'a> {
+pub struct RetrieveRefundCall<'a> {
     client: &'a StripeClient,
     refund_id: String
 }
 
-impl<'a> RetrieveRefundRequest<'a> {
-    pub fn new(client: &'a StripeClient, refund_id: String) -> RetrieveRefundRequest<'a> {
-        RetrieveRefundRequest {
-            client: client
+impl<'a> RetrieveRefundCall<'a> {
+    pub fn new(client: &'a StripeClient, refund_id: String) -> RetrieveRefundCall<'a> {
+        RetrieveRefundCall {
+            client: client,
             refund_id: refund_id
         }
     }
 }
 
-impl<'a> ApiCall<Refund> for RetrieveRefundRequest<'a> {
+impl<'a> ApiCall<Refund> for RetrieveRefundCall<'a> {
     fn call(self) -> Result<Refund> {
-        self.client.get(format!("/refunds/{}", self.refund_id))
+        self.client.get(format!("/refunds/{}", self.refund_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateRefundRequest<'a> {
+pub struct UpdateRefundCall<'a> {
     client: &'a StripeClient,
     refund_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateRefundRequest<'a> {
-    pub fn new(client: &'a StripeClient, refund_id: String) -> UpdateRefundRequest<'a> {
-        UpdateRefundRequest {
-            client: client
-            refund_id: refund_id
+impl<'a> UpdateRefundCall<'a> {
+    pub fn new(client: &'a StripeClient, refund_id: String) -> UpdateRefundCall<'a> {
+        UpdateRefundCall {
+            client: client,
+            refund_id: refund_id,
             args: CallArgs::new()
         }
     }
@@ -97,21 +96,21 @@ impl<'a> UpdateRefundRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Refund> for UpdateRefundRequest<'a> {
+impl<'a> ApiCall<Refund> for UpdateRefundCall<'a> {
     fn call(self) -> Result<Refund> {
         self.client.post(format!("/refunds/{}", self.refund_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct ListRefundRequest<'a> {
+pub struct ListRefundCall<'a> {
     client: &'a StripeClient,
     args: CallArgs,
 }
 
-impl<'a> ListRefundRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListRefundRequest<'a> {
-        ListRefundRequest {
+impl<'a> ListRefundCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListRefundCall<'a> {
+        ListRefundCall {
             client: client,
             args: CallArgs(vec![("include[]".to_string(), "total_count".to_string())])
         }
@@ -138,7 +137,7 @@ impl<'a> ListRefundRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Refund>> for ListRefundRequest<'a> {
+impl<'a> ApiCall<ApiList<Refund>> for ListRefundCall<'a> {
     fn call(self) -> Result<ApiList<Refund>> {
         self.client.get("/refunds", &self.args)
     }

@@ -5,14 +5,14 @@ use super::ApiCall;
 use {Result, StripeClient, TimeConstraint};
 
 #[derive(Debug)]
-pub struct CreateOrderRequest<'a> {
+pub struct CreateOrderCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateOrderRequest<'a> {
-    pub fn new(client: &'a StripeClient, currency: Currency) -> CreateOrderRequest<'a> {
-        CreateOrderRequest {
+impl<'a> CreateOrderCall<'a> {
+    pub fn new(client: &'a StripeClient, currency: Currency) -> CreateOrderCall<'a> {
+        CreateOrderCall {
             client: client,
             args: CallArgs(vec![("currency".to_string(), currency.to_string())])
         }
@@ -49,43 +49,43 @@ impl<'a> CreateOrderRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Order> for CreateOrderRequest<'a> {
+impl<'a> ApiCall<Order> for CreateOrderCall<'a> {
     fn call(self) -> Result<Order> {
         self.client.post("/orders", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveOrderRequest<'a> {
+pub struct RetrieveOrderCall<'a> {
     client: &'a StripeClient,
     order_id: String
 }
 
-impl<'a> RetrieveOrderRequest<'a> {
-    pub fn new(client: &'a StripeClient, order_id: String) -> RetrieveOrderRequest<'a> {
-        RetrieveOrderRequest {
+impl<'a> RetrieveOrderCall<'a> {
+    pub fn new(client: &'a StripeClient, order_id: String) -> RetrieveOrderCall<'a> {
+        RetrieveOrderCall {
             client: client,
             order_id: order_id
         }
     }
 }
 
-impl<'a> ApiCall<Order> for RetrieveOrderRequest<'a> {
+impl<'a> ApiCall<Order> for RetrieveOrderCall<'a> {
     fn call(self) -> Result<Order> {
         self.client.get(format!("/orders/{}", self.order_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateOrderRequest<'a> {
+pub struct UpdateOrderCall<'a> {
     client: &'a StripeClient,
     order_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateOrderRequest<'a> {
-    pub fn new(client: &'a StripeClient, order_id: String) -> UpdateOrderRequest<'a> {
-        UpdateOrderRequest {
+impl<'a> UpdateOrderCall<'a> {
+    pub fn new(client: &'a StripeClient, order_id: String) -> UpdateOrderCall<'a> {
+        UpdateOrderCall {
             client: client,
             order_id: order_id,
             args: CallArgs::new()
@@ -113,22 +113,22 @@ impl<'a> UpdateOrderRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Order> for UpdateOrderRequest<'a> {
+impl<'a> ApiCall<Order> for UpdateOrderCall<'a> {
     fn call(self) -> Result<Order> {
         self.client.post(format!("/orders/{}", self.order_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct PayOrderRequest<'a> {
+pub struct PayOrderCall<'a> {
     client: &'a StripeClient,
     order_id: String,
     args: CallArgs
 }
 
-impl<'a> PayOrderRequest<'a> {
-    pub fn new(client: &'a StripeClient, order_id: String) -> PayOrderRequest<'a> {
-        PayOrderRequest {
+impl<'a> PayOrderCall<'a> {
+    pub fn new(client: &'a StripeClient, order_id: String) -> PayOrderCall<'a> {
+        PayOrderCall {
             client: client,
             order_id: order_id,
             args: CallArgs::new()
@@ -166,21 +166,21 @@ impl<'a> PayOrderRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Order> for PayOrderRequest<'a> {
+impl<'a> ApiCall<Order> for PayOrderCall<'a> {
     fn call(self) -> Result<Order> {
         self.client.post(format!("/orders/{}/pay", self.order_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct ListOrdersRequest<'a> {
+pub struct ListOrdersCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListOrdersRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListOrdersRequest<'a> {
-        ListOrdersRequest {
+impl<'a> ListOrdersCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListOrdersCall<'a> {
+        ListOrdersCall {
             client: client,
             args: CallArgs(vec![("include[]".to_string(), "total_count".to_string())])
         }
@@ -272,7 +272,7 @@ impl<'a> ListOrdersRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Order>> for ListOrdersRequest<'a> {
+impl<'a> ApiCall<ApiList<Order>> for ListOrdersCall<'a> {
     fn call(self) -> Result<ApiList<Order>> {
         self.client.get("/orders", &self.args)
     }

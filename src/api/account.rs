@@ -8,21 +8,21 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct RetrieveAccountRequest<'a> {
+pub struct RetrieveAccountCall<'a> {
     client: &'a StripeClient,
     account_id: Option<String>
 }
 
-impl<'a> RetrieveAccountRequest<'a> {
-    pub fn new(client: &'a StripeClient, account_id: Option<String>) -> RetrieveAccountRequest<'a> {
-        RetrieveAccountRequest {
+impl<'a> RetrieveAccountCall<'a> {
+    pub fn new(client: &'a StripeClient, account_id: Option<String>) -> RetrieveAccountCall<'a> {
+        RetrieveAccountCall {
             client: client,
             account_id: account_id
         }
     }
 }
 
-impl<'a> ApiCall<Account> for RetrieveAccountRequest<'a> {
+impl<'a> ApiCall<Account> for RetrieveAccountCall<'a> {
     fn call(self) -> Result<Account> {
         let endpoint = self.account_id
             .map(|id| format!("/accounts/{}", id))
@@ -32,14 +32,14 @@ impl<'a> ApiCall<Account> for RetrieveAccountRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct CreateAccountRequest<'a> {
+pub struct CreateAccountCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateAccountRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> CreateAccountRequest<'a> {
-        CreateAccountRequest {
+impl<'a> CreateAccountCall<'a> {
+    pub fn new(client: &'a StripeClient) -> CreateAccountCall<'a> {
+        CreateAccountCall {
             client: client,
             args: CallArgs::new()
         }
@@ -154,22 +154,22 @@ impl<'a> CreateAccountRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Account> for CreateAccountRequest<'a> {
+impl<'a> ApiCall<Account> for CreateAccountCall<'a> {
     fn call(self) -> Result<Account> {
         self.client.post("/accounts", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateAccountRequest<'a> {
+pub struct UpdateAccountCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateAccountRequest<'a> {
-    pub fn new(client: &'a StripeClient, account_id: String) -> UpdateAccountRequest<'a> {
-        UpdateAccountRequest {
+impl<'a> UpdateAccountCall<'a> {
+    pub fn new(client: &'a StripeClient, account_id: String) -> UpdateAccountCall<'a> {
+        UpdateAccountCall {
             client: client,
             account_id: account_id,
             args: CallArgs::new()
@@ -275,47 +275,47 @@ impl<'a> UpdateAccountRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Account> for UpdateAccountRequest<'a> {
+impl<'a> ApiCall<Account> for UpdateAccountCall<'a> {
     fn call(self) -> Result<Account> {
         self.client.post(format!("/accounts/{}", self.account_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct DeleteAccountRequest<'a> {
+pub struct DeleteAccountCall<'a> {
     client: &'a StripeClient,
     account_id: String
 }
 
-impl<'a> DeleteAccountRequest<'a> {
-    pub fn new(client: &'a StripeClient, account_id: String) -> DeleteAccountRequest<'a> {
-        DeleteAccountRequest {
+impl<'a> DeleteAccountCall<'a> {
+    pub fn new(client: &'a StripeClient, account_id: String) -> DeleteAccountCall<'a> {
+        DeleteAccountCall {
             client: client,
             account_id: account_id
         }
     }
 }
 
-impl<'a> ApiCall<Delete> for DeleteAccountRequest<'a> {
+impl<'a> ApiCall<Delete> for DeleteAccountCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(format!("/accounts/{}", self.account_id))
     }
 }
 
 #[derive(Debug)]
-pub struct RejectAccountRequest<'a> {
+pub struct RejectAccountCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     reason: AccountRejectReason
 }
 
-impl<'a> RejectAccountRequest<'a> {
+impl<'a> RejectAccountCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         account_id: String,
         reason: AccountRejectReason
-    ) -> RejectAccountRequest<'a> {
-        RejectAccountRequest {
+    ) -> RejectAccountCall<'a> {
+        RejectAccountCall {
             client: client,
             account_id: account_id,
             reason: reason
@@ -323,7 +323,7 @@ impl<'a> RejectAccountRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Account> for RejectAccountRequest<'a> {
+impl<'a> ApiCall<Account> for RejectAccountCall<'a> {
     fn call(self) -> Result<Account> {
         self.client.post(
             format!("/accounts/{}/reject", self.account_id),
@@ -333,14 +333,14 @@ impl<'a> ApiCall<Account> for RejectAccountRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct ListAccountsRequest<'a> {
+pub struct ListAccountsCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListAccountsRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListAccountsRequest<'a> {
-        ListAccountsRequest {
+impl<'a> ListAccountsCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListAccountsCall<'a> {
+        ListAccountsCall {
             client: client,
             args: CallArgs::new()
         }
@@ -362,22 +362,22 @@ impl<'a> ListAccountsRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Account>> for ListAccountsRequest<'a> {
+impl<'a> ApiCall<ApiList<Account>> for ListAccountsCall<'a> {
     fn call(self) -> Result<ApiList<Account>> {
         self.client.get("/accounts", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct AccountCreateBankAccountRequest<'a> {
+pub struct AccountCreateBankAccountCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     args: CallArgs
 }
 
-impl<'a> AccountCreateBankAccountRequest<'a> {
-    pub fn new(client: &'a StripeClient, account_id: String) -> AccountCreateBankAccountRequest<'a> {
-        AccountCreateBankAccountRequest {
+impl<'a> AccountCreateBankAccountCall<'a> {
+    pub fn new(client: &'a StripeClient, account_id: String) -> AccountCreateBankAccountCall<'a> {
+        AccountCreateBankAccountCall {
             client: client,
             account_id: account_id,
             args: CallArgs::new()
@@ -405,26 +405,26 @@ impl<'a> AccountCreateBankAccountRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<BankAccount> for AccountCreateBankAccountRequest<'a> {
+impl<'a> ApiCall<BankAccount> for AccountCreateBankAccountCall<'a> {
     fn call(self) -> Result<BankAccount> {
         self.client.post(format!("/accounts/{}/external_accounts", self.account_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct AccountRetrieveBankAccountRequest<'a> {
+pub struct AccountRetrieveBankAccountCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     external_account_id: String
 }
 
-impl<'a> AccountRetrieveBankAccountRequest<'a> {
+impl<'a> AccountRetrieveBankAccountCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         account_id: String,
         external_account_id: String
-    ) -> AccountRetrieveBankAccountRequest<'a> {
-        AccountRetrieveBankAccountRequest {
+    ) -> AccountRetrieveBankAccountCall<'a> {
+        AccountRetrieveBankAccountCall {
             client: client,
             account_id: account_id,
             external_account_id: external_account_id
@@ -432,7 +432,7 @@ impl<'a> AccountRetrieveBankAccountRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<BankAccount> for AccountRetrieveBankAccountRequest<'a> {
+impl<'a> ApiCall<BankAccount> for AccountRetrieveBankAccountCall<'a> {
     fn call(self) -> Result<BankAccount> {
         self.client.get(
             format!("/accounts/{}/external_accounts/{}", self.account_id, self.external_account_id),
@@ -442,20 +442,20 @@ impl<'a> ApiCall<BankAccount> for AccountRetrieveBankAccountRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct AccountUpdateBankAccountRequest<'a> {
+pub struct AccountUpdateBankAccountCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     external_account_id: String,
     args: CallArgs
 }
 
-impl<'a> AccountUpdateBankAccountRequest<'a> {
+impl<'a> AccountUpdateBankAccountCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         account_id: String,
         external_account_id: String
-    ) -> AccountUpdateBankAccountRequest<'a> {
-        AccountUpdateBankAccountRequest {
+    ) -> AccountUpdateBankAccountCall<'a> {
+        AccountUpdateBankAccountCall {
             client: client,
             account_id: account_id,
             external_account_id: external_account_id,
@@ -474,7 +474,7 @@ impl<'a> AccountUpdateBankAccountRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<BankAccount> for AccountUpdateBankAccountRequest<'a> {
+impl<'a> ApiCall<BankAccount> for AccountUpdateBankAccountCall<'a> {
     fn call(self) -> Result<BankAccount> {
         self.client.post(
             format!("/accounts/{}/external_accounts/{}", self.account_id, self.external_account_id),
@@ -484,19 +484,19 @@ impl<'a> ApiCall<BankAccount> for AccountUpdateBankAccountRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct AccountDeleteBankAccountRequest<'a> {
+pub struct AccountDeleteBankAccountCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     external_account_id: String
 }
 
-impl<'a> AccountDeleteBankAccountRequest<'a> {
+impl<'a> AccountDeleteBankAccountCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         account_id: String,
         external_account_id: String
-    ) -> AccountDeleteBankAccountRequest<'a> {
-        AccountDeleteBankAccountRequest {
+    ) -> AccountDeleteBankAccountCall<'a> {
+        AccountDeleteBankAccountCall {
             client: client,
             account_id: account_id,
             external_account_id: external_account_id
@@ -504,7 +504,7 @@ impl<'a> AccountDeleteBankAccountRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Delete> for AccountDeleteBankAccountRequest<'a> {
+impl<'a> ApiCall<Delete> for AccountDeleteBankAccountCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(
             format!("/accounts/{}/external_accounts/{}",
@@ -515,15 +515,15 @@ impl<'a> ApiCall<Delete> for AccountDeleteBankAccountRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct AccountListBankAccountsRequest<'a> {
+pub struct AccountListBankAccountsCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     args: CallArgs
 }
 
-impl<'a> AccountListBankAccountsRequest<'a> {
-    pub fn new(client: &'a StripeClient, account_id: String) -> AccountListBankAccountsRequest<'a> {
-        AccountListBankAccountsRequest {
+impl<'a> AccountListBankAccountsCall<'a> {
+    pub fn new(client: &'a StripeClient, account_id: String) -> AccountListBankAccountsCall<'a> {
+        AccountListBankAccountsCall {
             client: client,
             account_id: account_id,
             args: CallArgs(vec![
@@ -549,22 +549,22 @@ impl<'a> AccountListBankAccountsRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<BankAccount>> for AccountListBankAccountsRequest<'a> {
+impl<'a> ApiCall<ApiList<BankAccount>> for AccountListBankAccountsCall<'a> {
     fn call(self) -> Result<ApiList<BankAccount>> {
         self.client.get(format!("/accounts/{}/external_accounts", self.account_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct AccountCreateCardRequest<'a> {
+pub struct AccountCreateCardCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     args: CallArgs
 }
 
-impl<'a> AccountCreateCardRequest<'a> {
-    pub fn new(client: &'a StripeClient, account_id: String) -> AccountCreateCardRequest<'a> {
-        AccountCreateCardRequest {
+impl<'a> AccountCreateCardCall<'a> {
+    pub fn new(client: &'a StripeClient, account_id: String) -> AccountCreateCardCall<'a> {
+        AccountCreateCardCall {
             client: client,
             account_id: account_id,
             args: CallArgs::new()
@@ -592,26 +592,26 @@ impl<'a> AccountCreateCardRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Card> for AccountCreateCardRequest<'a> {
+impl<'a> ApiCall<Card> for AccountCreateCardCall<'a> {
     fn call(self) -> Result<Card> {
         self.client.post(format!("/accounts/{}/external_accounts", self.account_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct AccountRetrieveCardRequest<'a> {
+pub struct AccountRetrieveCardCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     card_id: String
 }
 
-impl<'a> AccountRetrieveCardRequest<'a> {
+impl<'a> AccountRetrieveCardCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         account_id: String,
         card_id: String
-    ) -> AccountRetrieveCardRequest<'a> {
-        AccountRetrieveCardRequest {
+    ) -> AccountRetrieveCardCall<'a> {
+        AccountRetrieveCardCall {
             client: client,
             account_id: account_id,
             card_id: card_id
@@ -619,7 +619,7 @@ impl<'a> AccountRetrieveCardRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Card> for AccountRetrieveCardRequest<'a> {
+impl<'a> ApiCall<Card> for AccountRetrieveCardCall<'a> {
     fn call(self) -> Result<Card> {
         self.client.get(
             format!("/accounts/{}/external_accounts/{}", self.account_id, self.card_id),
@@ -629,20 +629,20 @@ impl<'a> ApiCall<Card> for AccountRetrieveCardRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct AccountUpdateCardRequest<'a> {
+pub struct AccountUpdateCardCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     card_id: String,
     args: CallArgs
 }
 
-impl<'a> AccountUpdateCardRequest<'a> {
+impl<'a> AccountUpdateCardCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         account_id: String,
         card_id: String
-    ) -> AccountUpdateCardRequest<'a> {
-        AccountUpdateCardRequest {
+    ) -> AccountUpdateCardCall<'a> {
+        AccountUpdateCardCall {
             client: client,
             account_id: account_id,
             card_id: card_id,
@@ -706,7 +706,7 @@ impl<'a> AccountUpdateCardRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Card> for AccountUpdateCardRequest<'a> {
+impl<'a> ApiCall<Card> for AccountUpdateCardCall<'a> {
     fn call(self) -> Result<Card> {
         self.client.post(
             format!("/accounts/{}/external_accounts/{}", self.account_id, self.card_id),
@@ -716,19 +716,19 @@ impl<'a> ApiCall<Card> for AccountUpdateCardRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct AccountDeleteCardRequest<'a> {
+pub struct AccountDeleteCardCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     card_id: String
 }
 
-impl<'a> AccountDeleteCardRequest<'a> {
+impl<'a> AccountDeleteCardCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         account_id: String,
         card_id: String
-    ) -> AccountDeleteCardRequest<'a> {
-        AccountDeleteCardRequest {
+    ) -> AccountDeleteCardCall<'a> {
+        AccountDeleteCardCall {
             client: client,
             account_id: account_id,
             card_id: card_id
@@ -736,7 +736,7 @@ impl<'a> AccountDeleteCardRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Delete> for AccountDeleteCardRequest<'a> {
+impl<'a> ApiCall<Delete> for AccountDeleteCardCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(format!(
             "/accounts/{}/external_accounts/{}",
@@ -747,15 +747,15 @@ impl<'a> ApiCall<Delete> for AccountDeleteCardRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct AccountListCardsRequest<'a> {
+pub struct AccountListCardsCall<'a> {
     client: &'a StripeClient,
     account_id: String,
     args: CallArgs
 }
 
-impl<'a> AccountListCardsRequest<'a> {
-    pub fn new(client: &'a StripeClient, account_id: String) -> AccountListCardsRequest<'a> {
-        AccountListCardsRequest {
+impl<'a> AccountListCardsCall<'a> {
+    pub fn new(client: &'a StripeClient, account_id: String) -> AccountListCardsCall<'a> {
+        AccountListCardsCall {
             client: client,
             account_id: account_id,
             args: CallArgs(vec![
@@ -781,7 +781,7 @@ impl<'a> AccountListCardsRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Card>> for AccountListCardsRequest<'a> {
+impl<'a> ApiCall<ApiList<Card>> for AccountListCardsCall<'a> {
     fn call(self) -> Result<ApiList<Card>> {
         self.client.get(format!("/accounts/{}/external_accounts", self.account_id), &self.args)
     }

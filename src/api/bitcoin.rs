@@ -5,19 +5,19 @@ use std::collections::BTreeMap;
 use super::ApiCall;
 
 #[derive(Debug)]
-pub struct CreateBitcoinReceiverRequest<'a> {
+pub struct CreateBitcoinReceiverCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateBitcoinReceiverRequest<'a> {
+impl<'a> CreateBitcoinReceiverCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         amount: i64,
         currency: Currency,
         email: String
-    ) -> CreateBitcoinReceiverRequest<'a> {
-        CreateBitcoinReceiverRequest {
+    ) -> CreateBitcoinReceiverCall<'a> {
+        CreateBitcoinReceiverCall {
             client: client,
             args: CallArgs(vec![
                 ("amount".to_string(), amount.to_string()),
@@ -43,42 +43,42 @@ impl<'a> CreateBitcoinReceiverRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<BitcoinReceiver> for CreateBitcoinReceiverRequest<'a> {
+impl<'a> ApiCall<BitcoinReceiver> for CreateBitcoinReceiverCall<'a> {
     fn call(self) -> Result<BitcoinReceiver> {
         self.client.post("/bitcoin/receivers", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveBitcoinReceiverRequest<'a> {
+pub struct RetrieveBitcoinReceiverCall<'a> {
     client: &'a StripeClient,
     receiver_id: String
 }
 
-impl<'a> RetrieveBitcoinReceiverRequest<'a> {
-    pub fn new(client: &'a StripeClient, receiver_id: String) -> RetrieveBitcoinReceiverRequest<'a> {
-        RetrieveBitcoinReceiverRequest {
+impl<'a> RetrieveBitcoinReceiverCall<'a> {
+    pub fn new(client: &'a StripeClient, receiver_id: String) -> RetrieveBitcoinReceiverCall<'a> {
+        RetrieveBitcoinReceiverCall {
             client: client,
             receiver_id: receiver_id
         }
     }
 }
 
-impl<'a> ApiCall<BitcoinReceiver> for RetrieveBitcoinReceiverRequest<'a> {
+impl<'a> ApiCall<BitcoinReceiver> for RetrieveBitcoinReceiverCall<'a> {
     fn call(self) -> Result<BitcoinReceiver> {
         self.client.get(format!("/bitcoin/receivers/{}", self.receiver_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct ListBitcoinReceiversRequest<'a> {
+pub struct ListBitcoinReceiversCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListBitcoinReceiversRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListBitcoinReceiversRequest<'a> {
-        ListBitcoinReceiversRequest {
+impl<'a> ListBitcoinReceiversCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListBitcoinReceiversCall<'a> {
+        ListBitcoinReceiversCall {
             client: client,
             args: CallArgs(vec![
                 ("include[]".to_string(), "total_count".to_string())
@@ -117,7 +117,7 @@ impl<'a> ListBitcoinReceiversRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<BitcoinReceiver>> for ListBitcoinReceiversRequest<'a> {
+impl<'a> ApiCall<ApiList<BitcoinReceiver>> for ListBitcoinReceiversCall<'a> {
     fn call(self) -> Result<ApiList<BitcoinReceiver>> {
         self.client.get("/bitcoin/receivers", &self.args)
     }

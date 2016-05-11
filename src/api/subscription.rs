@@ -5,19 +5,19 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateSubscriptionRequest<'a> {
+pub struct CreateSubscriptionCall<'a> {
     client: &'a StripeClient,
     customer_id: String,
     args: CallArgs
 }
 
-impl<'a> CreateSubscriptionRequest<'a> {
+impl<'a> CreateSubscriptionCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         customer_id: String,
         plan_id: String
-    ) -> CreateSubscriptionRequest<'a> {
-        CreateSubscriptionRequest {
+    ) -> CreateSubscriptionCall<'a> {
+        CreateSubscriptionCall {
             client: client,
             customer_id: customer_id,
             args: CallArgs::from(("plan", plan_id))
@@ -65,26 +65,26 @@ impl<'a> CreateSubscriptionRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Subscription> for CreateSubscriptionRequest<'a> {
+impl<'a> ApiCall<Subscription> for CreateSubscriptionCall<'a> {
     fn call(self) -> Result<Subscription> {
         self.client.post(format!("/customers/{}/subscriptions", self.customer_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveSubscriptionRequest<'a> {
+pub struct RetrieveSubscriptionCall<'a> {
     client: &'a StripeClient,
     customer_id: String,
     subscription_id: String
 }
 
-impl<'a> RetrieveSubscriptionRequest<'a> {
+impl<'a> RetrieveSubscriptionCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         customer_id: String,
         subscription_id: String
-    ) -> RetrieveSubscriptionRequest<'a> {
-        RetrieveSubscriptionRequest {
+    ) -> RetrieveSubscriptionCall<'a> {
+        RetrieveSubscriptionCall {
             client: client,
             customer_id: customer_id,
             subscription_id: subscription_id
@@ -92,7 +92,7 @@ impl<'a> RetrieveSubscriptionRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Subscription> for RetrieveSubscriptionRequest<'a> {
+impl<'a> ApiCall<Subscription> for RetrieveSubscriptionCall<'a> {
     fn call(self) -> Result<Subscription> {
         self.client.get(
             format!("/customers/{}/subscriptions/{}", self.customer_id, self.subscription_id),
@@ -102,20 +102,20 @@ impl<'a> ApiCall<Subscription> for RetrieveSubscriptionRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct UpdateSubscriptionRequest<'a> {
+pub struct UpdateSubscriptionCall<'a> {
     client: &'a StripeClient,
     customer_id: String,
     subscription_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateSubscriptionRequest<'a> {
+impl<'a> UpdateSubscriptionCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         customer_id: String,
         subscription_id: String
-    ) -> UpdateSubscriptionRequest<'a> {
-        UpdateSubscriptionRequest {
+    ) -> UpdateSubscriptionCall<'a> {
+        UpdateSubscriptionCall {
             client: client,
             customer_id: customer_id,
             subscription_id: subscription_id,
@@ -184,7 +184,7 @@ impl<'a> UpdateSubscriptionRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Subscription> for UpdateSubscriptionRequest<'a> {
+impl<'a> ApiCall<Subscription> for UpdateSubscriptionCall<'a> {
     fn call(self) -> Result<Subscription> {
         self.client.post(
             format!("/customers/{}/subscriptions/{}", self.customer_id, self.subscription_id),
@@ -194,20 +194,20 @@ impl<'a> ApiCall<Subscription> for UpdateSubscriptionRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct CancelSubscriptionRequest<'a> {
+pub struct CancelSubscriptionCall<'a> {
     client: &'a StripeClient,
     customer_id: String,
     subscription_id: String,
     args: CallArgs
 }
 
-impl<'a> CancelSubscriptionRequest<'a> {
+impl<'a> CancelSubscriptionCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         customer_id: String,
         subscription_id: String
-    ) -> CancelSubscriptionRequest<'a> {
-        CancelSubscriptionRequest {
+    ) -> CancelSubscriptionCall<'a> {
+        CancelSubscriptionCall {
             client: client,
             customer_id: customer_id,
             subscription_id: subscription_id,
@@ -221,7 +221,7 @@ impl<'a> CancelSubscriptionRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Subscription> for CancelSubscriptionRequest<'a> {
+impl<'a> ApiCall<Subscription> for CancelSubscriptionCall<'a> {
     fn call(self) -> Result<Subscription> {
         self.client.delete_with_args(
             format!("/customers/{}/subscriptions/{}", self.customer_id, self.subscription_id),
@@ -231,15 +231,15 @@ impl<'a> ApiCall<Subscription> for CancelSubscriptionRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct ListActiveSubscriptionsRequest<'a> {
+pub struct ListActiveSubscriptionsCall<'a> {
     client: &'a StripeClient,
     customer_id: String,
     args: CallArgs
 }
 
-impl<'a> ListActiveSubscriptionsRequest<'a> {
-    pub fn new(client: &'a StripeClient, customer_id: String) -> ListActiveSubscriptionsRequest<'a> {
-        ListActiveSubscriptionsRequest {
+impl<'a> ListActiveSubscriptionsCall<'a> {
+    pub fn new(client: &'a StripeClient, customer_id: String) -> ListActiveSubscriptionsCall<'a> {
+        ListActiveSubscriptionsCall {
             client: client,
             customer_id: customer_id,
             args: CallArgs::from(("include[]", "total_count"))
@@ -262,7 +262,7 @@ impl<'a> ListActiveSubscriptionsRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Subscription>> for ListActiveSubscriptionsRequest<'a> {
+impl<'a> ApiCall<ApiList<Subscription>> for ListActiveSubscriptionsCall<'a> {
     fn call(self) -> Result<ApiList<Subscription>> {
         self.client.get(format!("/customers/{}/subscriptions", self.customer_id), &self.args)
     }

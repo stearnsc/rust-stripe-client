@@ -4,14 +4,14 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct ListCountrySpecRequest<'a> {
+pub struct ListCountrySpecCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListCountrySpecRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListCountrySpecRequest<'a> {
-        ListCountrySpecRequest {
+impl<'a> ListCountrySpecCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListCountrySpecCall<'a> {
+        ListCountrySpecCall {
             client: client,
             args: CallArgs::new()
         }
@@ -33,28 +33,28 @@ impl<'a> ListCountrySpecRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<CountrySpec>> for ListCountrySpecRequest<'a> {
+impl<'a> ApiCall<ApiList<CountrySpec>> for ListCountrySpecCall<'a> {
     fn call(self) -> Result<ApiList<CountrySpec>> {
         self.client.get("country_specs", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveCountrySpecRequest<'a> {
+pub struct RetrieveCountrySpecCall<'a> {
     client: &'a StripeClient,
     iso_code: String
 }
 
-impl<'a> RetrieveCountrySpecRequest<'a> {
-    pub fn new(client: &'a StripeClient, iso_code: String) -> RetrieveCountrySpecRequest<'a> {
-        RetrieveCountrySpecRequest {
+impl<'a> RetrieveCountrySpecCall<'a> {
+    pub fn new(client: &'a StripeClient, iso_code: String) -> RetrieveCountrySpecCall<'a> {
+        RetrieveCountrySpecCall {
             client: client,
             iso_code: iso_code
         }
     }
 }
 
-impl<'a> ApiCall<CountrySpec> for RetrieveCountrySpecRequest<'a> {
+impl<'a> ApiCall<CountrySpec> for RetrieveCountrySpecCall<'a> {
     fn call(self) -> Result<CountrySpec> {
         self.client.get(format!("/country_specs/{}", self.iso_code), &())
     }

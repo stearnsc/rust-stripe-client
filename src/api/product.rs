@@ -5,14 +5,14 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateProductRequest<'a> {
+pub struct CreateProductCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateProductRequest<'a> {
-    pub fn new(client: &'a StripeClient, name: String) -> CreateProductRequest<'a> {
-        CreateProductRequest {
+impl<'a> CreateProductCall<'a> {
+    pub fn new(client: &'a StripeClient, name: String) -> CreateProductCall<'a> {
+        CreateProductCall {
             client: client,
             args: CallArgs(vec![("name".to_string(), name)])
         }
@@ -74,22 +74,22 @@ impl<'a> CreateProductRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Product> for CreateProductRequest<'a> {
+impl<'a> ApiCall<Product> for CreateProductCall<'a> {
     fn call(self) -> Result<Product> {
         self.client.post("/products", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveProductRequest<'a> {
+pub struct RetrieveProductCall<'a> {
     client: &'a StripeClient,
     product_id: String,
     args: CallArgs
 }
 
-impl<'a> RetrieveProductRequest<'a> {
-    pub fn new(client: &'a StripeClient, product_id: String) -> RetrieveProductRequest<'a> {
-        RetrieveProductRequest {
+impl<'a> RetrieveProductCall<'a> {
+    pub fn new(client: &'a StripeClient, product_id: String) -> RetrieveProductCall<'a> {
+        RetrieveProductCall {
             client: client,
             product_id: product_id,
             args: CallArgs::new()
@@ -97,22 +97,22 @@ impl<'a> RetrieveProductRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Product> for RetrieveProductRequest<'a> {
+impl<'a> ApiCall<Product> for RetrieveProductCall<'a> {
     fn call(self) -> Result<Product> {
         self.client.get(format!("/products/{}", self.product_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateProductRequest<'a> {
+pub struct UpdateProductCall<'a> {
     client: &'a StripeClient,
     product_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateProductRequest<'a> {
-    pub fn new(client: &'a StripeClient, product_id: String) -> UpdateProductRequest<'a> {
-        UpdateProductRequest {
+impl<'a> UpdateProductCall<'a> {
+    pub fn new(client: &'a StripeClient, product_id: String) -> UpdateProductCall<'a> {
+        UpdateProductCall {
             client: client,
             product_id: product_id,
             args: CallArgs::new()
@@ -170,21 +170,21 @@ impl<'a> UpdateProductRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Product> for UpdateProductRequest<'a> {
+impl<'a> ApiCall<Product> for UpdateProductCall<'a> {
     fn call(self) -> Result<Product> {
         self.client.post(format!("/products/{}", self.product_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct ListProductsRequest<'a> {
+pub struct ListProductsCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListProductsRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListProductsRequest<'a> {
-        ListProductsRequest {
+impl<'a> ListProductsCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListProductsCall<'a> {
+        ListProductsCall {
             client: client,
             args: CallArgs(vec![("include[]".to_string(), "total_count".to_string())])
         }
@@ -226,28 +226,28 @@ impl<'a> ListProductsRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Product>> for ListProductsRequest<'a> {
+impl<'a> ApiCall<ApiList<Product>> for ListProductsCall<'a> {
     fn call(self) -> Result<ApiList<Product>> {
         self.client.get("/products", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct DeleteProductRequest<'a> {
+pub struct DeleteProductCall<'a> {
     client: &'a StripeClient,
     product_id: String
 }
 
-impl<'a> DeleteProductRequest<'a> {
-    pub fn new(client: &'a StripeClient, product_id: String) -> DeleteProductRequest<'a> {
-        DeleteProductRequest {
+impl<'a> DeleteProductCall<'a> {
+    pub fn new(client: &'a StripeClient, product_id: String) -> DeleteProductCall<'a> {
+        DeleteProductCall {
             client: client,
             product_id: product_id
         }
     }
 }
 
-impl<'a> ApiCall<Delete> for DeleteProductRequest<'a> {
+impl<'a> ApiCall<Delete> for DeleteProductCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(format!("/products/{}", self.product_id))
     }

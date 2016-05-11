@@ -5,35 +5,35 @@ use time_constraint::TimeConstraint;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct RetrieveEventRequest<'a> {
+pub struct RetrieveEventCall<'a> {
     client: &'a StripeClient,
     event_id: String
 }
 
-impl<'a> RetrieveEventRequest<'a> {
-    pub fn new(client: &'a StripeClient, event_id: String) -> RetrieveEventRequest<'a> {
-        RetrieveEventRequest {
+impl<'a> RetrieveEventCall<'a> {
+    pub fn new(client: &'a StripeClient, event_id: String) -> RetrieveEventCall<'a> {
+        RetrieveEventCall {
             client: client,
             event_id: event_id
         }
     }
 }
 
-impl<'a> ApiCall<Event> for RetrieveEventRequest<'a> {
+impl<'a> ApiCall<Event> for RetrieveEventCall<'a> {
     fn call(self) -> Result<Event> {
         self.client.get(&format!("/events/{}", self.event_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct ListEventRequest<'a> {
+pub struct ListEventCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListEventRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListEventRequest<'a> {
-        ListEventRequest {
+impl<'a> ListEventCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListEventCall<'a> {
+        ListEventCall {
             client: client,
             args: CallArgs(vec![("include[]".to_string(), "total_count".to_string())])
         }
@@ -65,7 +65,7 @@ impl<'a> ListEventRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Event>> for ListEventRequest<'a> {
+impl<'a> ApiCall<ApiList<Event>> for ListEventCall<'a> {
     fn call(self) -> Result<ApiList<Event>> {
         self.client.get("/events", &self.args)
     }

@@ -2,19 +2,18 @@ use call_args::CallArgs;
 use model::{ApiList, FeeRefund};
 use std::collections::BTreeMap;
 use super::ApiCall;
-use time_constraint::TimeConstraint;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateFeeRefundRequest<'a> {
+pub struct CreateFeeRefundCall<'a> {
     client: &'a StripeClient,
     application_fee_id: String,
     args: CallArgs
 }
 
-impl<'a> CreateFeeRefundRequest<'a> {
-    pub fn new(client: &'a StripeClient, application_fee_id: String) -> CreateFeeRefundRequest<'a> {
-        CreateFeeRefundRequest {
+impl<'a> CreateFeeRefundCall<'a> {
+    pub fn new(client: &'a StripeClient, application_fee_id: String) -> CreateFeeRefundCall<'a> {
+        CreateFeeRefundCall {
             client: client,
             application_fee_id: application_fee_id,
             args: CallArgs::new()
@@ -32,7 +31,7 @@ impl<'a> CreateFeeRefundRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<FeeRefund> for CreateFeeRefundRequest<'a> {
+impl<'a> ApiCall<FeeRefund> for CreateFeeRefundCall<'a> {
     fn call(self) -> Result<FeeRefund> {
         self.client.post(
             format!("/application_fees/{}/refunds", self.application_fee_id),
@@ -42,19 +41,19 @@ impl<'a> ApiCall<FeeRefund> for CreateFeeRefundRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct RetrieveFeeRefundRequest<'a> {
+pub struct RetrieveFeeRefundCall<'a> {
     client: &'a StripeClient,
     fee_id: String,
     refund_id: String
 }
 
-impl<'a> RetrieveFeeRefundRequest<'a> {
+impl<'a> RetrieveFeeRefundCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         fee_id: String,
         refund_id: String
-    ) -> RetrieveFeeRefundRequest<'a> {
-        RetrieveFeeRefundRequest {
+    ) -> RetrieveFeeRefundCall<'a> {
+        RetrieveFeeRefundCall {
             client: client,
             fee_id: fee_id,
             refund_id: refund_id
@@ -62,7 +61,7 @@ impl<'a> RetrieveFeeRefundRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<FeeRefund> for RetrieveFeeRefundRequest<'a> {
+impl<'a> ApiCall<FeeRefund> for RetrieveFeeRefundCall<'a> {
     fn call(self) -> Result<FeeRefund> {
         self.client.get(
             format!("/application_fees/{}/refunds/{}", self.fee_id, self.refund_id),
@@ -72,24 +71,24 @@ impl<'a> ApiCall<FeeRefund> for RetrieveFeeRefundRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct UpdateFeeRefundRequest<'a> {
+pub struct UpdateFeeRefundCall<'a> {
     client: &'a StripeClient,
     fee_id: String,
     refund_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateFeeRefundRequest<'a> {
+impl<'a> UpdateFeeRefundCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         fee_id: String,
         refund_id: String
-    ) -> UpdateFeeRefundRequest<'a> {
-        UpdateFeeRefundRequest {
+    ) -> UpdateFeeRefundCall<'a> {
+        UpdateFeeRefundCall {
             client: client,
             fee_id: fee_id,
             refund_id: refund_id,
-            args: CallArgs
+            args: CallArgs::new()
         }
     }
 
@@ -99,8 +98,8 @@ impl<'a> UpdateFeeRefundRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<OBJECT> for UpdateFeeRefundRequest<'a> {
-    fn call(self) -> Result<OBJECT> {
+impl<'a> ApiCall<FeeRefund> for UpdateFeeRefundCall<'a> {
+    fn call(self) -> Result<FeeRefund> {
         self.client.post(
             format!("/application_fees/{}/refunds/{}", self.fee_id, self.refund_id),
             &self.args
@@ -109,17 +108,18 @@ impl<'a> ApiCall<OBJECT> for UpdateFeeRefundRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct ListFeeRefundsRequest<'a> {
+pub struct ListFeeRefundsCall<'a> {
     client: &'a StripeClient,
     fee_id: String,
     args: CallArgs
 }
 
-impl<'a> ListFeeRefundsRequest<'a> {
-    pub fn new(client: &'a StripeClient, fee_id: String) -> ListFeeRefundsRequest<'a> {
-        ListFeeRefundsRequest {
+impl<'a> ListFeeRefundsCall<'a> {
+    pub fn new(client: &'a StripeClient, fee_id: String) -> ListFeeRefundsCall<'a> {
+        ListFeeRefundsCall {
             client: client,
-            fee_id: fee_id
+            fee_id: fee_id,
+            args: CallArgs::from(("include[]", "total_count"))
         }
     }
 
@@ -139,7 +139,7 @@ impl<'a> ListFeeRefundsRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<FeeRefund>> for ListFeeRefundsRequest<'a> {
+impl<'a> ApiCall<ApiList<FeeRefund>> for ListFeeRefundsCall<'a> {
     fn call(self) -> Result<ApiList<FeeRefund>> {
         self.client.get(format!("/application_fees/{}/refunds", self.fee_id), &self.args)
     }

@@ -5,12 +5,12 @@ use super::ApiCall;
 use {Result, StripeClient, TimeConstraint};
 
 #[derive(Debug)]
-pub struct CreatePlanRequest<'a> {
+pub struct CreatePlanCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreatePlanRequest<'a> {
+impl<'a> CreatePlanCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         id: String,
@@ -18,8 +18,8 @@ impl<'a> CreatePlanRequest<'a> {
         currency: Currency,
         interval: Interval,
         name: String
-    ) -> CreatePlanRequest<'a> {
-        CreatePlanRequest {
+    ) -> CreatePlanCall<'a> {
+        CreatePlanCall {
             client: client,
             args: CallArgs::from((
                 ("id", id),
@@ -52,43 +52,43 @@ impl<'a> CreatePlanRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Plan> for CreatePlanRequest<'a> {
+impl<'a> ApiCall<Plan> for CreatePlanCall<'a> {
     fn call(self) -> Result<Plan> {
         self.client.post("/plans", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrievePlanRequest<'a> {
+pub struct RetrievePlanCall<'a> {
     client: &'a StripeClient,
     plan_id: String
 }
 
-impl<'a> RetrievePlanRequest<'a> {
-    pub fn new(client: &'a StripeClient, plan_id: String) -> RetrievePlanRequest<'a> {
-        RetrievePlanRequest {
+impl<'a> RetrievePlanCall<'a> {
+    pub fn new(client: &'a StripeClient, plan_id: String) -> RetrievePlanCall<'a> {
+        RetrievePlanCall {
             client: client,
             plan_id: plan_id
         }
     }
 }
 
-impl<'a> ApiCall<Plan> for RetrievePlanRequest<'a> {
+impl<'a> ApiCall<Plan> for RetrievePlanCall<'a> {
     fn call(self) -> Result<Plan> {
         self.client.get(format!("/plans/{}", self.plan_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct UpdatePlanRequest<'a> {
+pub struct UpdatePlanCall<'a> {
     client: &'a StripeClient,
     plan_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdatePlanRequest<'a> {
-    pub fn new(client: &'a StripeClient, plan_id: String) -> UpdatePlanRequest<'a> {
-        UpdatePlanRequest {
+impl<'a> UpdatePlanCall<'a> {
+    pub fn new(client: &'a StripeClient, plan_id: String) -> UpdatePlanCall<'a> {
+        UpdatePlanCall {
             client: client,
             plan_id: plan_id,
             args: CallArgs::new()
@@ -111,42 +111,42 @@ impl<'a> UpdatePlanRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Plan> for UpdatePlanRequest<'a> {
+impl<'a> ApiCall<Plan> for UpdatePlanCall<'a> {
     fn call(self) -> Result<Plan> {
         self.client.post(format!("/plans/{}", self.plan_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct DeletePlanRequest<'a> {
+pub struct DeletePlanCall<'a> {
     client: &'a StripeClient,
     plan_id: String
 }
 
-impl<'a> DeletePlanRequest<'a> {
-    pub fn new(client: &'a StripeClient, plan_id: String) -> DeletePlanRequest<'a> {
-        DeletePlanRequest {
+impl<'a> DeletePlanCall<'a> {
+    pub fn new(client: &'a StripeClient, plan_id: String) -> DeletePlanCall<'a> {
+        DeletePlanCall {
             client: client,
             plan_id: plan_id
         }
     }
 }
 
-impl<'a> ApiCall<Delete> for DeletePlanRequest<'a> {
+impl<'a> ApiCall<Delete> for DeletePlanCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(format!("/plans/{}", self.plan_id))
     }
 }
 
 #[derive(Debug)]
-pub struct ListPlansRequest<'a> {
+pub struct ListPlansCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListPlansRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListPlansRequest<'a> {
-        ListPlansRequest {
+impl<'a> ListPlansCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListPlansCall<'a> {
+        ListPlansCall {
             client: client,
             args: CallArgs::from(("include[]", "total_count"))
         }
@@ -178,7 +178,7 @@ impl<'a> ListPlansRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Plan>> for ListPlansRequest<'a> {
+impl<'a> ApiCall<ApiList<Plan>> for ListPlansCall<'a> {
     fn call(self) -> Result<ApiList<Plan>> {
         self.client.get("/plans", &self.args)
     }

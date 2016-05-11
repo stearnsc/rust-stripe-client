@@ -5,25 +5,25 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateSkuRequest<'a> {
+pub struct CreateSkuCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateSkuRequest<'a> {
+impl<'a> CreateSkuCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         currency: Currency,
         inventory: Inventory,
         price: i64,
         product: String
-    ) -> CreateSkuRequest<'a> {
+    ) -> CreateSkuCall<'a> {
         let mut args = CallArgs::new();
         args.add_arg("currency", currency);
         args.add_object("inventory", inventory);
         args.add_arg("price", price);
         args.add_arg("product", product);
-        CreateSkuRequest {
+        CreateSkuCall {
             client: client,
             args: args
         }
@@ -60,43 +60,43 @@ impl<'a> CreateSkuRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Sku> for CreateSkuRequest<'a> {
+impl<'a> ApiCall<Sku> for CreateSkuCall<'a> {
     fn call(self) -> Result<Sku> {
         self.client.post("/skus", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveSkuRequest<'a> {
+pub struct RetrieveSkuCall<'a> {
     client: &'a StripeClient,
     sku_id: String
 }
 
-impl<'a> RetrieveSkuRequest<'a> {
-    pub fn new(client: &'a StripeClient, sku_id: String) -> RetrieveSkuRequest<'a> {
-        RetrieveSkuRequest {
+impl<'a> RetrieveSkuCall<'a> {
+    pub fn new(client: &'a StripeClient, sku_id: String) -> RetrieveSkuCall<'a> {
+        RetrieveSkuCall {
             client: client,
             sku_id: sku_id
         }
     }
 }
 
-impl<'a> ApiCall<Sku> for RetrieveSkuRequest<'a> {
+impl<'a> ApiCall<Sku> for RetrieveSkuCall<'a> {
     fn call(self) -> Result<Sku> {
         self.client.get(format!("/sku_id/{}", self.sku_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateSkuRequest<'a> {
+pub struct UpdateSkuCall<'a> {
     client: &'a StripeClient,
     sku_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateSkuRequest<'a> {
-    pub fn new(client: &'a StripeClient, sku_id: String) -> UpdateSkuRequest<'a> {
-        UpdateSkuRequest {
+impl<'a> UpdateSkuCall<'a> {
+    pub fn new(client: &'a StripeClient, sku_id: String) -> UpdateSkuCall<'a> {
+        UpdateSkuCall {
             client: client,
             sku_id: sku_id,
             args: CallArgs::new()
@@ -144,21 +144,21 @@ impl<'a> UpdateSkuRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Sku> for UpdateSkuRequest<'a> {
+impl<'a> ApiCall<Sku> for UpdateSkuCall<'a> {
     fn call(self) -> Result<Sku> {
         self.client.post(format!("/skus/{}", self.sku_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct ListSkusRequest<'a> {
+pub struct ListSkusCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListSkusRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListSkusRequest<'a> {
-        ListSkusRequest {
+impl<'a> ListSkusCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListSkusCall<'a> {
+        ListSkusCall {
             client: client,
             args: CallArgs::from(("include[]", "total_count"))
         }
@@ -205,28 +205,28 @@ impl<'a> ListSkusRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Sku>> for ListSkusRequest<'a> {
+impl<'a> ApiCall<ApiList<Sku>> for ListSkusCall<'a> {
     fn call(self) -> Result<ApiList<Sku>> {
         self.client.get("/skus", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct DeleteSkuRequest<'a> {
+pub struct DeleteSkuCall<'a> {
     client: &'a StripeClient,
     sku_id: String,
 }
 
-impl<'a> DeleteSkuRequest<'a> {
-    pub fn new(client: &'a StripeClient, sku_id: String) -> DeleteSkuRequest<'a> {
-        DeleteSkuRequest {
+impl<'a> DeleteSkuCall<'a> {
+    pub fn new(client: &'a StripeClient, sku_id: String) -> DeleteSkuCall<'a> {
+        DeleteSkuCall {
             client: client,
             sku_id: sku_id
         }
     }
 }
 
-impl<'a> ApiCall<Delete> for DeleteSkuRequest<'a> {
+impl<'a> ApiCall<Delete> for DeleteSkuCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(format!("/skus/{}", self.sku_id))
     }

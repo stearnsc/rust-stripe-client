@@ -8,21 +8,20 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateChargeRequest<'a> {
+pub struct CreateChargeCall<'a> {
     client: &'a StripeClient,
     args: CallArgs,
     currency: Currency,
     idempotency_key: Option<String>
 }
 
-impl<'a> CreateChargeRequest<'a> {
+impl<'a> CreateChargeCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         amount: i64,
         currency: Currency,
-        idempotency_key: Option<String>
-    ) -> CreateChargeRequest<'a> {
-        CreateChargeRequest {
+    ) -> CreateChargeCall<'a> {
+        CreateChargeCall {
             client: client,
             args: CallArgs(vec![
                 ("amount".to_string(), amount.to_string()),
@@ -92,7 +91,7 @@ impl<'a> CreateChargeRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Charge> for CreateChargeRequest<'a> {
+impl<'a> ApiCall<Charge> for CreateChargeCall<'a> {
     fn call(self) -> Result<Charge> {
         let endpoint = "/charges";
 
@@ -108,36 +107,36 @@ impl<'a> ApiCall<Charge> for CreateChargeRequest<'a> {
 }
 
 #[derive(Debug)]
-pub struct RetrieveChargeRequest<'a> {
+pub struct RetrieveChargeCall<'a> {
     client: &'a StripeClient,
     charge_id: String,
 }
 
-impl<'a> RetrieveChargeRequest<'a> {
-    pub fn new(client: &'a StripeClient, charge_id: String) -> RetrieveChargeRequest<'a> {
-        RetrieveChargeRequest {
+impl<'a> RetrieveChargeCall<'a> {
+    pub fn new(client: &'a StripeClient, charge_id: String) -> RetrieveChargeCall<'a> {
+        RetrieveChargeCall {
             client: client,
             charge_id: charge_id,
         }
     }
 }
 
-impl<'a> ApiCall<Charge> for RetrieveChargeRequest<'a> {
+impl<'a> ApiCall<Charge> for RetrieveChargeCall<'a> {
     fn call(self) -> Result<Charge> {
         self.client.get(&format!("/charges/{}", self.charge_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateChargeRequest<'a> {
+pub struct UpdateChargeCall<'a> {
     client: &'a StripeClient,
     charge_id: String,
     args: CallArgs,
 }
 
-impl<'a> UpdateChargeRequest<'a> {
-    pub fn new(client: &'a StripeClient, charge_id: String) -> UpdateChargeRequest<'a> {
-        UpdateChargeRequest {
+impl<'a> UpdateChargeCall<'a> {
+    pub fn new(client: &'a StripeClient, charge_id: String) -> UpdateChargeCall<'a> {
+        UpdateChargeCall {
             client: client,
             charge_id: charge_id,
             args: CallArgs::new()
@@ -170,22 +169,22 @@ impl<'a> UpdateChargeRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Charge> for UpdateChargeRequest<'a> {
+impl<'a> ApiCall<Charge> for UpdateChargeCall<'a> {
     fn call(self) -> Result<Charge> {
         self.client.post(format!("/charges/{}", self.charge_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct CaptureChargeRequest<'a> {
+pub struct CaptureChargeCall<'a> {
     client: &'a StripeClient,
     charge_id: String,
     args: CallArgs,
 }
 
-impl<'a> CaptureChargeRequest<'a> {
-    pub fn new(client: &'a StripeClient, charge_id: String) -> CaptureChargeRequest<'a> {
-        CaptureChargeRequest {
+impl<'a> CaptureChargeCall<'a> {
+    pub fn new(client: &'a StripeClient, charge_id: String) -> CaptureChargeCall<'a> {
+        CaptureChargeCall {
             client: client,
             charge_id: charge_id,
             args: CallArgs::new()
@@ -213,21 +212,21 @@ impl<'a> CaptureChargeRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Charge> for CaptureChargeRequest<'a> {
+impl<'a> ApiCall<Charge> for CaptureChargeCall<'a> {
     fn call(self) -> Result<Charge> {
         self.client.post(format!("/charges/{}/capture", self.charge_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct ListChargesRequest<'a> {
+pub struct ListChargesCall<'a> {
     client: &'a StripeClient,
     args: CallArgs,
 }
 
-impl<'a> ListChargesRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListChargesRequest<'a> {
-        ListChargesRequest {
+impl<'a> ListChargesCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListChargesCall<'a> {
+        ListChargesCall {
             client: client,
             args: CallArgs(vec![("include[]".to_string(), "total_count".to_string())])
         }
@@ -264,7 +263,7 @@ impl<'a> ListChargesRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Charge>> for ListChargesRequest<'a> {
+impl<'a> ApiCall<ApiList<Charge>> for ListChargesCall<'a> {
     fn call(self) -> Result<ApiList<Charge>> {
         self.client.get("/charges", &self.args)
     }

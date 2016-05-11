@@ -6,19 +6,19 @@ use time_constraint::TimeConstraint;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct CreateTransferRequest<'a> {
+pub struct CreateTransferCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateTransferRequest<'a> {
+impl<'a> CreateTransferCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         amount: i64,
         currency: Currency,
         destination: String
-    ) -> CreateTransferRequest<'a> {
-        CreateTransferRequest {
+    ) -> CreateTransferCall<'a> {
+        CreateTransferCall {
             client: client,
             args: CallArgs(vec![
                 ("amount".to_string(), amount.to_string()),
@@ -54,43 +54,43 @@ impl<'a> CreateTransferRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Transfer> for CreateTransferRequest<'a> {
+impl<'a> ApiCall<Transfer> for CreateTransferCall<'a> {
     fn call(self) -> Result<Transfer> {
         self.client.post("/transfers", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveTransferRequest<'a> {
+pub struct RetrieveTransferCall<'a> {
     client: &'a StripeClient,
     transfer_id: String
 }
 
-impl<'a> RetrieveTransferRequest<'a> {
-    pub fn new(client: &'a StripeClient, transfer_id: String) -> RetrieveTransferRequest<'a> {
-        RetrieveTransferRequest {
+impl<'a> RetrieveTransferCall<'a> {
+    pub fn new(client: &'a StripeClient, transfer_id: String) -> RetrieveTransferCall<'a> {
+        RetrieveTransferCall {
             client: client,
             transfer_id: transfer_id
         }
     }
 }
 
-impl<'a> ApiCall<Transfer> for RetrieveTransferRequest<'a> {
+impl<'a> ApiCall<Transfer> for RetrieveTransferCall<'a> {
     fn call(self) -> Result<Transfer> {
         self.client.get(format!("/transfers/{}", self.transfer_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateTransferRequest<'a> {
+pub struct UpdateTransferCall<'a> {
     client: &'a StripeClient,
     transfer_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateTransferRequest<'a> {
-    pub fn new(client: &'a StripeClient, transfer_id: String) -> UpdateTransferRequest<'a> {
-        UpdateTransferRequest {
+impl<'a> UpdateTransferCall<'a> {
+    pub fn new(client: &'a StripeClient, transfer_id: String) -> UpdateTransferCall<'a> {
+        UpdateTransferCall {
             client: client,
             transfer_id: transfer_id,
             args: CallArgs::new()
@@ -108,21 +108,21 @@ impl<'a> UpdateTransferRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Transfer> for UpdateTransferRequest<'a> {
+impl<'a> ApiCall<Transfer> for UpdateTransferCall<'a> {
     fn call(self) -> Result<Transfer> {
         self.client.post(format!("transfers/{}", self.transfer_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct ListTransfersRequest<'a> {
+pub struct ListTransfersCall<'a> {
     client: &'a StripeClient,
     args: CallArgs,
 }
 
-impl<'a> ListTransfersRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListTransfersRequest<'a> {
-        ListTransfersRequest {
+impl<'a> ListTransfersCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListTransfersCall<'a> {
+        ListTransfersCall {
             client: client,
             args: CallArgs::new()
         }
@@ -179,7 +179,7 @@ impl<'a> ListTransfersRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Transfer>> for ListTransfersRequest<'a> {
+impl<'a> ApiCall<ApiList<Transfer>> for ListTransfersCall<'a> {
     fn call(self) -> Result<ApiList<Transfer>> {
         self.client.get("/transfers", &self.args)
     }

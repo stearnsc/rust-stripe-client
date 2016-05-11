@@ -5,14 +5,14 @@ use super::ApiCall;
 use {Result, StripeClient, TimeConstraint};
 
 #[derive(Debug)]
-pub struct CreateInvoiceRequest<'a> {
+pub struct CreateInvoiceCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateInvoiceRequest<'a> {
-    pub fn new(client: &'a StripeClient, customer: String) -> CreateInvoiceRequest<'a> {
-        CreateInvoiceRequest {
+impl<'a> CreateInvoiceCall<'a> {
+    pub fn new(client: &'a StripeClient, customer: String) -> CreateInvoiceCall<'a> {
+        CreateInvoiceCall {
             client: client,
             args: CallArgs::from(("customer", customer))
         }
@@ -49,43 +49,43 @@ impl<'a> CreateInvoiceRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Invoice> for CreateInvoiceRequest<'a> {
+impl<'a> ApiCall<Invoice> for CreateInvoiceCall<'a> {
     fn call(self) -> Result<Invoice> {
         self.client.post("/invoices", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveInvoiceRequest<'a> {
+pub struct RetrieveInvoiceCall<'a> {
     client: &'a StripeClient,
     invoice_id: String
 }
 
-impl<'a> RetrieveInvoiceRequest<'a> {
-    pub fn new(client: &'a StripeClient, invoice_id: String) -> RetrieveInvoiceRequest<'a> {
-        RetrieveInvoiceRequest {
+impl<'a> RetrieveInvoiceCall<'a> {
+    pub fn new(client: &'a StripeClient, invoice_id: String) -> RetrieveInvoiceCall<'a> {
+        RetrieveInvoiceCall {
             client: client,
             invoice_id: invoice_id
         }
     }
 }
 
-impl<'a> ApiCall<Invoice> for RetrieveInvoiceRequest<'a> {
+impl<'a> ApiCall<Invoice> for RetrieveInvoiceCall<'a> {
     fn call(self) -> Result<Invoice> {
         self.client.get(format!("/incoices/{}", self.invoice_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveInvoiceLinesRequest<'a> {
+pub struct RetrieveInvoiceLinesCall<'a> {
     client: &'a StripeClient,
     invoice_id: String,
     args: CallArgs
 }
 
-impl<'a> RetrieveInvoiceLinesRequest<'a> {
-    pub fn new(client: &'a StripeClient, invoice_id: String) -> RetrieveInvoiceLinesRequest<'a> {
-        RetrieveInvoiceLinesRequest {
+impl<'a> RetrieveInvoiceLinesCall<'a> {
+    pub fn new(client: &'a StripeClient, invoice_id: String) -> RetrieveInvoiceLinesCall<'a> {
+        RetrieveInvoiceLinesCall {
             client: client,
             invoice_id: invoice_id,
             args: CallArgs::new()
@@ -148,21 +148,21 @@ impl<'a> RetrieveInvoiceLinesRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<InvoiceLineItem>> for RetrieveInvoiceLinesRequest<'a> {
+impl<'a> ApiCall<ApiList<InvoiceLineItem>> for RetrieveInvoiceLinesCall<'a> {
     fn call(self) -> Result<ApiList<InvoiceLineItem>> {
         self.client.get(format!("/invoices/{}/lines", self.invoice_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveUpcomingInvoiceRequest<'a> {
+pub struct RetrieveUpcomingInvoiceCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> RetrieveUpcomingInvoiceRequest<'a> {
-    pub fn new(client: &'a StripeClient, customer_id: String) -> RetrieveUpcomingInvoiceRequest<'a> {
-        RetrieveUpcomingInvoiceRequest {
+impl<'a> RetrieveUpcomingInvoiceCall<'a> {
+    pub fn new(client: &'a StripeClient, customer_id: String) -> RetrieveUpcomingInvoiceCall<'a> {
+        RetrieveUpcomingInvoiceCall {
             client: client,
             args: CallArgs::from(("customer", customer_id))
         }
@@ -204,22 +204,22 @@ impl<'a> RetrieveUpcomingInvoiceRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Invoice> for RetrieveUpcomingInvoiceRequest<'a> {
+impl<'a> ApiCall<Invoice> for RetrieveUpcomingInvoiceCall<'a> {
     fn call(self) -> Result<Invoice> {
         self.client.get("/invoices/upcoming", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateInvoiceRequest<'a> {
+pub struct UpdateInvoiceCall<'a> {
     client: &'a StripeClient,
     invoice_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateInvoiceRequest<'a> {
-    pub fn new(client: &'a StripeClient, invoice_id: String) -> UpdateInvoiceRequest<'a> {
-        UpdateInvoiceRequest {
+impl<'a> UpdateInvoiceCall<'a> {
+    pub fn new(client: &'a StripeClient, invoice_id: String) -> UpdateInvoiceCall<'a> {
+        UpdateInvoiceCall {
             client: client,
             invoice_id: invoice_id,
             args: CallArgs::new()
@@ -262,42 +262,42 @@ impl<'a> UpdateInvoiceRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Invoice> for UpdateInvoiceRequest<'a> {
+impl<'a> ApiCall<Invoice> for UpdateInvoiceCall<'a> {
     fn call(self) -> Result<Invoice> {
         self.client.post(format!("/invoices/{}", self.invoice_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct PayInvoiceRequest<'a> {
+pub struct PayInvoiceCall<'a> {
     client: &'a StripeClient,
     invoice_id: String
 }
 
-impl<'a> PayInvoiceRequest<'a> {
-    pub fn new(client: &'a StripeClient, invoice_id: String) -> PayInvoiceRequest<'a> {
-        PayInvoiceRequest {
+impl<'a> PayInvoiceCall<'a> {
+    pub fn new(client: &'a StripeClient, invoice_id: String) -> PayInvoiceCall<'a> {
+        PayInvoiceCall {
             client: client,
             invoice_id: invoice_id
         }
     }
 }
 
-impl<'a> ApiCall<Invoice> for PayInvoiceRequest<'a> {
+impl<'a> ApiCall<Invoice> for PayInvoiceCall<'a> {
     fn call(self) -> Result<Invoice> {
         self.client.post(format!("/invoices/{}/pay", self.invoice_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct ListInvoicesRequest<'a> {
+pub struct ListInvoicesCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListInvoicesRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListInvoicesRequest<'a> {
-        ListInvoicesRequest {
+impl<'a> ListInvoicesCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListInvoicesCall<'a> {
+        ListInvoicesCall {
             client: client,
             args: CallArgs::from(("include[]", "total_count"))
         }
@@ -334,7 +334,7 @@ impl<'a> ListInvoicesRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Invoice>> for ListInvoicesRequest<'a> {
+impl<'a> ApiCall<ApiList<Invoice>> for ListInvoicesCall<'a> {
     fn call(self) -> Result<ApiList<Invoice>> {
         self.client.get("/invoices", &self.args)
     }

@@ -5,57 +5,57 @@ use super::ApiCall;
 use time_constraint::TimeConstraint;
 
 #[derive(Debug)]
-pub struct RetrieveBalanceRequest<'a> {
+pub struct RetrieveBalanceCall<'a> {
     client: &'a StripeClient,
 }
 
-impl<'a> RetrieveBalanceRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> RetrieveBalanceRequest<'a> {
-        RetrieveBalanceRequest {
+impl<'a> RetrieveBalanceCall<'a> {
+    pub fn new(client: &'a StripeClient) -> RetrieveBalanceCall<'a> {
+        RetrieveBalanceCall {
             client: client
         }
     }
 }
 
-impl<'a> ApiCall<Balance> for RetrieveBalanceRequest<'a> {
+impl<'a> ApiCall<Balance> for RetrieveBalanceCall<'a> {
     fn call(self) -> Result<Balance> {
         self.client.get("/balance", &())
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveBalanceTransactionRequest<'a> {
+pub struct RetrieveBalanceTransactionCall<'a> {
     client: &'a StripeClient,
     balance_transaction_id: String
 }
 
-impl<'a> RetrieveBalanceTransactionRequest<'a> {
+impl<'a> RetrieveBalanceTransactionCall<'a> {
     pub fn new(
         client: &'a StripeClient,
-        balance_transaction_id: &str
-    ) -> RetrieveBalanceTransactionRequest<'a> {
-        RetrieveBalanceTransactionRequest {
+        balance_transaction_id: String
+    ) -> RetrieveBalanceTransactionCall<'a> {
+        RetrieveBalanceTransactionCall {
             client: client,
-            balance_transaction_id: String::from(balance_transaction_id)
+            balance_transaction_id: balance_transaction_id
         }
     }
 }
 
-impl<'a> ApiCall<BalanceTransaction> for RetrieveBalanceTransactionRequest<'a> {
+impl<'a> ApiCall<BalanceTransaction> for RetrieveBalanceTransactionCall<'a> {
     fn call(self) -> Result<BalanceTransaction> {
         self.client.get(&format!("/balance/history/{}", self.balance_transaction_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct ListBalanceHistoryRequest<'a> {
+pub struct ListBalanceHistoryCall<'a> {
     client: &'a StripeClient,
     args: CallArgs,
 }
 
-impl<'a> ListBalanceHistoryRequest<'a> {
+impl<'a> ListBalanceHistoryCall<'a> {
     pub fn new(client: &'a StripeClient) -> Self {
-        ListBalanceHistoryRequest {
+        ListBalanceHistoryCall {
             client: client,
             args: CallArgs(vec![("include[]".to_string(), "total_count".to_string())])
         }
@@ -107,7 +107,7 @@ impl<'a> ListBalanceHistoryRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<BalanceTransaction>> for ListBalanceHistoryRequest<'a> {
+impl<'a> ApiCall<ApiList<BalanceTransaction>> for ListBalanceHistoryCall<'a> {
     fn call(self) -> Result<ApiList<BalanceTransaction>> {
         self.client.get("/balance/history", &self.args)
     }

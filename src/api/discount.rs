@@ -3,40 +3,40 @@ use super::ApiCall;
 use {Result, StripeClient};
 
 #[derive(Debug)]
-pub struct DeleteCustomerDiscountRequest<'a> {
+pub struct DeleteCustomerDiscountCall<'a> {
     client: &'a StripeClient,
     customer_id: String
 }
 
-impl<'a> DeleteCustomerDiscountRequest<'a> {
-    pub fn new(client: &'a StripeClient, customer_id: String) -> DeleteCustomerDiscountRequest<'a> {
-        DeleteCustomerDiscountRequest {
+impl<'a> DeleteCustomerDiscountCall<'a> {
+    pub fn new(client: &'a StripeClient, customer_id: String) -> DeleteCustomerDiscountCall<'a> {
+        DeleteCustomerDiscountCall {
             client: client,
             customer_id: customer_id
         }
     }
 }
 
-impl<'a> ApiCall<Delete> for DeleteCustomerDiscountRequest<'a> {
+impl<'a> ApiCall<Delete> for DeleteCustomerDiscountCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(format!("/customers/{}/discount", self.customer_id))
     }
 }
 
 #[derive(Debug)]
-pub struct DeleteSubscriptionDiscountRequest<'a> {
+pub struct DeleteSubscriptionDiscountCall<'a> {
     client: &'a StripeClient,
     customer_id: String,
     subscription_id: String
 }
 
-impl<'a> DeleteSubscriptionDiscountRequest<'a> {
+impl<'a> DeleteSubscriptionDiscountCall<'a> {
     pub fn new(
         client: &'a StripeClient,
         customer_id: String,
         subscription_id: String
-    ) -> DeleteSubscriptionDiscountRequest<'a> {
-        DeleteSubscriptionDiscountRequest {
+    ) -> DeleteSubscriptionDiscountCall<'a> {
+        DeleteSubscriptionDiscountCall {
             client: client,
             customer_id: customer_id,
             subscription_id: subscription_id
@@ -44,7 +44,7 @@ impl<'a> DeleteSubscriptionDiscountRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Delete> for DeleteSubscriptionDiscountRequest<'a> {
+impl<'a> ApiCall<Delete> for DeleteSubscriptionDiscountCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(format!(
             "/customers/{}/subscriptions/{}/discount",

@@ -5,16 +5,16 @@ use super::ApiCall;
 use {Result, StripeClient, TimeConstraint};
 
 #[derive(Debug)]
-pub struct CreateCouponRequest<'a> {
+pub struct CreateCouponCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> CreateCouponRequest<'a> {
-    pub fn new(client: &'a StripeClient, duration: CouponDuration) -> CreateCouponRequest<'a> {
+impl<'a> CreateCouponCall<'a> {
+    pub fn new(client: &'a StripeClient, duration: CouponDuration) -> CreateCouponCall<'a> {
         let mut args = CallArgs::new();
         args.add_arg("duration", duration);
-        CreateCouponRequest {
+        CreateCouponCall {
             client: client,
             args: args
         }
@@ -61,43 +61,43 @@ impl<'a> CreateCouponRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Coupon> for CreateCouponRequest<'a> {
+impl<'a> ApiCall<Coupon> for CreateCouponCall<'a> {
     fn call(self) -> Result<Coupon> {
         self.client.post("/coupons", &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct RetrieveCouponRequest<'a> {
+pub struct RetrieveCouponCall<'a> {
     client: &'a StripeClient,
     coupon_id: String
 }
 
-impl<'a> RetrieveCouponRequest<'a> {
-    pub fn new(client: &'a StripeClient, coupon_id: String) -> RetrieveCouponRequest<'a> {
-        RetrieveCouponRequest {
+impl<'a> RetrieveCouponCall<'a> {
+    pub fn new(client: &'a StripeClient, coupon_id: String) -> RetrieveCouponCall<'a> {
+        RetrieveCouponCall {
             client: client,
             coupon_id: coupon_id
         }
     }
 }
 
-impl<'a> ApiCall<Coupon> for RetrieveCouponRequest<'a> {
+impl<'a> ApiCall<Coupon> for RetrieveCouponCall<'a> {
     fn call(self) -> Result<Coupon> {
         self.client.get(format!("/coupons/{}", self.coupon_id), &())
     }
 }
 
 #[derive(Debug)]
-pub struct UpdateCouponRequest<'a> {
+pub struct UpdateCouponCall<'a> {
     client: &'a StripeClient,
     coupon_id: String,
     args: CallArgs
 }
 
-impl<'a> UpdateCouponRequest<'a> {
-    pub fn new(client: &'a StripeClient, coupon_id: String) -> UpdateCouponRequest<'a> {
-        UpdateCouponRequest {
+impl<'a> UpdateCouponCall<'a> {
+    pub fn new(client: &'a StripeClient, coupon_id: String) -> UpdateCouponCall<'a> {
+        UpdateCouponCall {
             client: client,
             coupon_id: coupon_id,
             args: CallArgs::new()
@@ -110,42 +110,42 @@ impl<'a> UpdateCouponRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<Coupon> for UpdateCouponRequest<'a> {
+impl<'a> ApiCall<Coupon> for UpdateCouponCall<'a> {
     fn call(self) -> Result<Coupon> {
         self.client.post(format!("/coupons/{}", self.coupon_id), &self.args)
     }
 }
 
 #[derive(Debug)]
-pub struct DeleteCouponRequest<'a> {
+pub struct DeleteCouponCall<'a> {
     client: &'a StripeClient,
     coupon_id: String
 }
 
-impl<'a> DeleteCouponRequest<'a> {
-    pub fn new(client: &'a StripeClient, coupon_id: String) -> DeleteCouponRequest<'a> {
-        DeleteCouponRequest {
+impl<'a> DeleteCouponCall<'a> {
+    pub fn new(client: &'a StripeClient, coupon_id: String) -> DeleteCouponCall<'a> {
+        DeleteCouponCall {
             client: client,
             coupon_id: coupon_id
         }
     }
 }
 
-impl<'a> ApiCall<Delete> for DeleteCouponRequest<'a> {
+impl<'a> ApiCall<Delete> for DeleteCouponCall<'a> {
     fn call(self) -> Result<Delete> {
         self.client.delete(format!("/coupons/{}", self.coupon_id))
     }
 }
 
 #[derive(Debug)]
-pub struct ListCouponsRequest<'a> {
+pub struct ListCouponsCall<'a> {
     client: &'a StripeClient,
     args: CallArgs
 }
 
-impl<'a> ListCouponsRequest<'a> {
-    pub fn new(client: &'a StripeClient) -> ListCouponsRequest<'a> {
-        ListCouponsRequest {
+impl<'a> ListCouponsCall<'a> {
+    pub fn new(client: &'a StripeClient) -> ListCouponsCall<'a> {
+        ListCouponsCall {
             client: client,
             args: CallArgs::from(("include[]", "total_count"))
         }
@@ -177,7 +177,7 @@ impl<'a> ListCouponsRequest<'a> {
     }
 }
 
-impl<'a> ApiCall<ApiList<Coupon>> for ListCouponsRequest<'a> {
+impl<'a> ApiCall<ApiList<Coupon>> for ListCouponsCall<'a> {
     fn call(self) -> Result<ApiList<Coupon>> {
         self.client.get("/coupons", &self.args)
     }
