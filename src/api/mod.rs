@@ -48,6 +48,6 @@ pub use self::transfer_reversal::*;
 
 use Result;
 
-trait ApiCall<T> {
+pub trait ApiCall<T> {
     fn call(self) -> Result<T>;
 }
