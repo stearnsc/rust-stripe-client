@@ -27,7 +27,6 @@ mod stripe_version_header;
 mod url_encodable;
 mod time_constraint;
 
-pub use api::ApiCall;
 pub use either::Either;
 pub use time_constraint::TimeConstraint;
 
