@@ -55,6 +55,11 @@ impl<'a> CreateChargeCall<'a> {
         self
     }
 
+    pub fn expand(mut self, expand: String) -> Self {
+        self.args.add_arg("expand[]", expand);
+        self
+    }
+
     pub fn metadata(mut self, metadata: BTreeMap<String, String>) -> Self {
         self.args.add_object("metadata", metadata);
         self
@@ -110,6 +115,7 @@ impl<'a> ApiCall<Charge> for CreateChargeCall<'a> {
 pub struct RetrieveChargeCall<'a> {
     client: &'a StripeClient,
     charge_id: String,
+    args: CallArgs
 }
 
 impl<'a> RetrieveChargeCall<'a> {
@@ -117,13 +123,20 @@ impl<'a> RetrieveChargeCall<'a> {
         RetrieveChargeCall {
             client: client,
             charge_id: charge_id,
+            args: CallArgs::new()
         }
     }
+
+    pub fn expand(mut self, expand: String) -> Self {
+        self.args.add_arg("expand[]", expand);
+        self
+    }
+
 }
 
 impl<'a> ApiCall<Charge> for RetrieveChargeCall<'a> {
     fn call(self) -> Result<Charge> {
-        self.client.get(&format!("/charges/{}", self.charge_id), &())
+        self.client.get(&format!("/charges/{}", self.charge_id), &self.args)
     }
 }
 
@@ -145,6 +158,11 @@ impl<'a> UpdateChargeCall<'a> {
 
     pub fn description(mut self, description: String) -> Self {
         self.args.add_arg("description", description);
+        self
+    }
+
+    pub fn expand(mut self, expand: String) -> Self {
+        self.args.add_arg("expand[]", expand);
         self
     }
 
@@ -201,6 +219,11 @@ impl<'a> CaptureChargeCall<'a> {
         self
     }
 
+    pub fn expand(mut self, expand: String) -> Self {
+        self.args.add_arg("expand[]", expand);
+        self
+    }
+
     pub fn receipt_email(mut self, receipt_email: String) -> Self {
         self.args.add_arg("receipt_email", receipt_email);
         self
@@ -244,6 +267,11 @@ impl<'a> ListChargesCall<'a> {
 
     pub fn ending_before(mut self, ending_before: String) -> Self {
         self.args.add_arg("ending_before", ending_before);
+        self
+    }
+
+    pub fn expand(mut self, expand: String) -> Self {
+        self.args.add_arg("expand[]", expand);
         self
     }
 

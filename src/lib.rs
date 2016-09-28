@@ -1,11 +1,12 @@
-#![feature(custom_derive, plugin)]
-#![feature(question_mark)]
-#![plugin(serde_macros)]
+#![feature(question_mark, rustc_macro)]
+#![feature(structural_match)]
 
 extern crate hyper;
 extern crate rand;
 extern crate serde;
 extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
 
 use hyper::client::response::Response;
 use hyper::Client;
